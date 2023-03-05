@@ -40,6 +40,7 @@ class Graph:
                 output += f"{source}-->{destination}\n"
         return output
     
+
     def add_edge(self, node1, node2, power_min, dist=1):
         """
         Adds an edge to the graph. Graphs are not oriented, hence an edge is added to the adjacency list of both end nodes. 
@@ -55,6 +56,8 @@ class Graph:
         dist: numeric (int or float), optional
             Distance between node1 and node2 on the edge. Default is 1.
         """
+        node1 = int(node1)
+        node2 = int(node2)
         if node1 not in self.graph:
             self.graph[node1] = []
             self.nb_nodes += 1
@@ -70,12 +73,55 @@ class Graph:
     
 
     def get_path_with_power(self, src, dest, power):
-        raise NotImplementedError
+        
+        
+        # on commence par regarder si le trajet peut être couvert
+
+        # graphe avec seulement les arêtes que peut emprunter le camion étant donnée sa puissance
+        nv_graphe = Graph([i for i in range(1, self.nb_nodes+1)])
+        for sommet, aretes in self.graph.items():
+            for arete in aretes:
+                if arete[1] <= power:
+                    nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
+            
+        # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
+        # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
+        # il y a un chemin entre eux
+        for ssgraphe in nv_graphe.connected_components():
+            if src in ssgraphe and dest in ssgraphe:
+                ind_min = min(ssgraphe.index(src), ssgraphe.index(dest))
+                ind_max = max(ssgraphe.index(src), ssgraphe.index(dest))
+                chemin = [ssgraphe[i] for i in range(ind_min, ind_max+1)]
+                break
+            elif src in ssgraphe and dest not in ssgraphe:
+                chemin = None
+                break
+            elif dest in ssgraphe and src not in ssgraphe:
+                chemin = None
+                break
+
+        return chemin
     
 
     def connected_components(self):
-        raise NotImplementedError
+        list_components=[]
+        node_visited={node:False for node in self.nodes}
 
+        def dfs(node):
+            component =[node]
+            for neighbour in self.graph[node]:
+                neighbour=neighbour[0]
+                if not node_visited[neighbour]:
+                    node_visited[neighbour]=True
+                    component += dfs(neighbour)
+            return component
+        
+        for node in self.nodes:
+            if not node_visited[node]:
+                list_components.append(dfs(node))
+
+        return list_components
+    
 
     def connected_components_set(self):
         """
@@ -84,11 +130,30 @@ class Graph:
         """
         return set(map(frozenset, self.connected_components()))
     
+
     def min_power(self, src, dest):
         """
         Should return path, min_power. 
         """
-        raise NotImplementedError
+        liste_power = []
+
+        for i in self.graph.values():
+            for k in i:
+                liste_power.append(k[1])
+
+        valeur_sup = max(liste_power)
+        valeur_inf = min(liste_power)
+        pivot = int(np.percentile(liste_power, 50))
+
+        while valeur_sup != valeur_inf:
+            if self.get_path_with_power(src, dest, pivot) == None:
+                valeur_inf = pivot + 1
+                pivot = (valeur_inf + valeur_sup) // 2
+            elif self.get_path_with_power(src, dest, pivot) != None:
+                valeur_sup = pivot
+                pivot = (valeur_inf + valeur_sup) // 2
+        
+        return self.get_path_with_power(src, dest, pivot), pivot        
 
 
 def graph_from_file(filename):
@@ -115,7 +180,7 @@ def graph_from_file(filename):
         n, m = map(int, file.readline().split())
         g = Graph(range(1, n+1))
         for _ in range(m):
-            edge = list(map(int, file.readline().split()))
+            edge = list(map(float, file.readline().split()))
             if len(edge) == 3:
                 node1, node2, power_min = edge
                 g.add_edge(node1, node2, power_min) # will add dist=1 by default
