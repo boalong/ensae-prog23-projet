@@ -1,3 +1,5 @@
+import numpy as np
+
 class Graph:
     """
     A class representing graphs as adjacency lists and implementing various algorithms on the graphs. Graphs in the class are not oriented. 
@@ -78,12 +80,12 @@ class Graph:
         # on commence par regarder si le trajet peut être couvert
 
         # graphe avec seulement les arêtes que peut emprunter le camion étant donnée sa puissance
-        nv_graphe = Graph([i for i in range(1, self.nb_nodes+1)])
+        nv_graphe = Graph([i for i in self.nodes])
         for sommet, aretes in self.graph.items():
             for arete in aretes:
                 if arete[1] <= power:
                     nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
-            
+   
         # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
         # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
         # il y a un chemin entre eux
@@ -101,29 +103,67 @@ class Graph:
                 break
 
         return chemin
+        
+        '''
+        # Bonus : algorithme de Dijkstra
+        def poids_arc(s1,s2):
+            if s1>s2:
+                return poids_arc(s2,s1)
+            for sommet in self.graph[s1]:
+                if sommet[0] == s2:
+                    poids = sommet[2]
+            return poids
+    
+        def relacher(s1, s2, distance, predecesseur):
+            # s1 et s2 sont adjacents
+            if distance[s2] > distance[s1] + poids_arc(s1,s2):
+                distance[s2] = distance[s1] + poids_arc(s1,s2)
+                predecesseur[s2] = s1
+
+        def extraire_distance_min(liste):
+            d_min, ind_min = distance[liste[0]], 0 
+            for i in range(1,len(liste)):
+                if distance[liste[i]] < d_min:
+                    d_min, ind_min = distance[liste[i]], i
+            return ind_min
+        
+        def dijkstra(G, racine):
+            E = []
+            F = self.nodes
+            while F:
+                sommet = F.pop(extraire_distance_min(F))
+                E.append(sommet)
+                for adjacent in G[sommet]:
+                    adjacent = adjacent[0]
+                    relacher(sommet,adjacent,distance,predecesseur)
+            
+        def plus_court_chemin(G, depart, arrivee):
+            dijkstra(G, depart)
+            point = arrivee
+            chemin = []
+            while point != depart:
+                chemin.append(point)
+                point = predecesseur[point]
+        
+            chemin.append(depart)
+            chemin.reverse()
+    
+            return chemin
+  
+        # Initialisation
+        distance = {node : np.inf for node in self.nodes}
+        predecesseur = {node : None for node in self.nodes}
+        distance[src] = 0
+
+        try:
+            return plus_court_chemin(nv_graphe.graph, src, dest), distance[dest]
+        except:
+            return None
+        '''
+    
     
 
     def connected_components(self):
-        '''
-        list_components=[]
-        node_visited={node:False for node in self.nodes}
-
-        def dfs(node):
-            component = [node]
-            for neighbour in self.graph[node]:
-                neighbour=neighbour[0]
-                if not node_visited[neighbour]:
-                    node_visited[neighbour]=True
-                    component += dfs(neighbour)
-            return component
-        
-        for node in self.nodes:
-            if not node_visited[node]:
-                list_components.append(dfs(node))
-
-        return list_components
-        '''
-
         list_components = []
 
         def DFS(root,visited):
@@ -219,7 +259,7 @@ def graph_from_file(filename):
     with open(filename, "r") as file:
         n, m = map(int, file.readline().split()) # pour network
         # m = int(file.readline()) # pour routes
-        g = Graph(range(1, n+1)) # pour network
+        g = Graph([i for i in range(1, n+1)]) # pour network
         # g = Graph() # pour routes
         for _ in range(m):
             edge = list(map(float, file.readline().split()))
