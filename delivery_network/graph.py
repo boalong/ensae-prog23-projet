@@ -104,11 +104,12 @@ class Graph:
     
 
     def connected_components(self):
+        '''
         list_components=[]
         node_visited={node:False for node in self.nodes}
 
         def dfs(node):
-            component =[node]
+            component = [node]
             for neighbour in self.graph[node]:
                 neighbour=neighbour[0]
                 if not node_visited[neighbour]:
@@ -120,6 +121,45 @@ class Graph:
             if not node_visited[node]:
                 list_components.append(dfs(node))
 
+        return list_components
+        '''
+
+        list_components = []
+
+        def DFS(root,visited):
+
+            # Create a stack for DFS
+            stack = []
+ 
+            # Push the current source node.
+            stack.append(root)
+ 
+            while (len(stack)):
+                # Pop a vertex from stack and print it
+                s = stack.pop()
+ 
+                # Stack may contain same vertex twice. So
+                # we need to add the popped item to the list only
+                # if it is not visited.
+                if (not visited[s]):
+                    list_components[-1].append(s)
+                    visited[s] = True
+ 
+                # Get all adjacent vertices of the popped vertex s
+                # If a adjacent has not been visited, then push it
+                # to the stack.
+                for node in self.graph[s]:
+                    node = node[0]
+                    if (not visited[node]):
+                        stack.append(node)
+                        
+        visited_nodes = {node:False for node in self.nodes}
+
+        for i in self.graph.keys():
+            if (not visited_nodes[i]):
+                list_components.append([])
+                DFS(i, visited_nodes)
+            
         return list_components
     
 
@@ -177,8 +217,10 @@ def graph_from_file(filename):
         An object of the class Graph with the graph from file_name.
     """
     with open(filename, "r") as file:
-        n, m = map(int, file.readline().split())
-        g = Graph(range(1, n+1))
+        n, m = map(int, file.readline().split()) # pour network
+        # m = int(file.readline()) # pour routes
+        g = Graph(range(1, n+1)) # pour network
+        # g = Graph() # pour routes
         for _ in range(m):
             edge = list(map(float, file.readline().split()))
             if len(edge) == 3:
