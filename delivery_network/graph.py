@@ -80,11 +80,13 @@ class Graph:
         # on commence par regarder si le trajet peut être couvert
 
         # graphe avec seulement les arêtes que peut emprunter le camion étant donnée sa puissance
+        # faire attention à ne pas ajouter 2 fois la même arête
         nv_graphe = Graph([i for i in self.nodes])
         for sommet, aretes in self.graph.items():
             for arete in aretes:
-                if arete[1] <= power:
-                    nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
+                if sommet < arete[0]:
+                    if arete[1] <= power:
+                        nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
    
         # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
         # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
