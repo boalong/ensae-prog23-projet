@@ -2,6 +2,8 @@ import numpy as np
 from time import perf_counter
 from graph import Graph, graph_from_file
 
+print('Hello world')
+
 data_path = "input/"
 file_name = "routes.10.in"
 
