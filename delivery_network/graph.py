@@ -89,6 +89,10 @@ class Graph:
         # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
         # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
         # il y a un chemin entre eux
+        # pour trouver un chemin quelconque, on fait un deep search à partir de l'un des deux et on remonte à partir
+        # second pour avoir un chemin
+
+        '''
         for ssgraphe in nv_graphe.connected_components():
             if src in ssgraphe and dest in ssgraphe:
                 ind_min = min(ssgraphe.index(src), ssgraphe.index(dest))
@@ -101,6 +105,60 @@ class Graph:
             elif dest in ssgraphe and src not in ssgraphe:
                 chemin = None
                 break
+
+        return chemin
+        '''
+
+        # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
+        # DFS et reconstruire le chemin à partir des parents
+
+        def DFS_chemin(root,arrivee,visited):
+
+            # Create a stack for DFS
+            stack = []
+ 
+            # Push the current source node.
+            stack.append(root)
+ 
+            while (len(stack)):
+                # Pop a vertex from stack
+                s = stack.pop()
+ 
+                # Stack may contain same vertex twice. So
+                # we need to add the popped item to the list only
+                # if it is not visited.
+                if (not visited[s]):
+                    visited[s] = True
+ 
+                # Get all adjacent vertices of the popped vertex s
+                # If a adjacent has not been visited, then push it
+                # to the stack.
+                # On les visitera plus tard
+                for node in self.graph[s]:
+                    node = node[0]
+                    if (not visited[node]):
+                        stack.append(node)
+                        parent[node] = s
+                        if node == arrivee:
+                        # Dans ce cas, on peut arrêter le pgrm car on a tout ce qu'il faut pour avoir notre chemin
+                            return None
+
+        parent = {i: None for i in nv_graphe.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
+        visited_nodes = {node:False for node in self.nodes}
+
+        DFS_chemin(src, dest, visited_nodes)
+
+        # Récupérer le chemin à partir du dict parent
+
+        chemin = [dest]
+
+        while parent[dest] != src:
+            chemin.append(parent[dest])
+            dest = parent[dest]      
+
+        chemin.append(src)
+
+        chemin.reverse()
 
         return chemin
         
@@ -233,7 +291,76 @@ class Graph:
                 valeur_sup = pivot
                 pivot = (valeur_inf + valeur_sup) // 2
         
-        return self.get_path_with_power(src, dest, pivot), pivot        
+        return self.get_path_with_power(src, dest, pivot), pivot 
+
+
+    def arbre_couvrant_de_poids_min(self):
+
+        def makeset(s):
+            parent[s] = s
+            rang[s] = 0
+
+        def sort_by_weight(list_edges):
+            return list_edges.sort(key = lambda x: x[3])
+
+        def find(s):
+            while s != parent[s] :
+                s = parent[s]
+            return s
+
+        def union(x,y):
+            r_x = find(x)
+            r_y = find(y)
+
+            # Si x et y sont déjà dans le même set
+            if r_x == r_y:
+                return None
+            if rang[r_x] > rang[r_y]:
+                parent[r_y] = r_x
+            else:
+                parent[r_x] = r_y
+                if rang[r_x] == rang[r_y]: 
+                    rang[r_y] = rang[r_y] + 1
+    
+
+        def kruskal(G):
+        # Input: A connected undirected graph G = (V, E)
+        # Output: A minimum spanning tree defined by the edges X
+            for sommet in G.keys():
+            # for sommet in self.nodes:
+                makeset(sommet)
+        
+            # X est un graphe vide
+            X = Graph()
+    
+            # Créer une liste avec les noeuds et leur poids
+            liste_aretes = []
+            for sommet, arrivee in G.items():
+                for element in arrivee:
+                    # On évite de mettre deux fois la même arête
+                    if sommet < element[0]:
+                        liste_aretes.append([sommet, element[0], element[1], element[2]])
+    
+            # Sort the edges E by weight    
+            sort_by_weight(liste_aretes)
+            
+            for arete in liste_aretes:
+                if find(arete[0]) != find(arete[1]):
+                    X.add_edge(arete[0],arete[1],arete[2],arete[3])
+                    union(arete[0], arete[1])
+    
+            return X
+            
+        # Initialisation
+        parent = {}
+        rang = {}
+
+        arbre_brut = kruskal(self.graph)
+
+        # On trie les sommets du graphe
+        arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
+
+        return(arbre_brut)     
 
 
 def graph_from_file(filename):
