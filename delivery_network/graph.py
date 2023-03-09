@@ -275,7 +275,7 @@ class Graph:
         return set(map(frozenset, self.connected_components()))
     
 
-    def min_power(self, src, dest):
+    def min_power(self, src, dest, pourcentile=50):
         """
         Should return path, min_power. 
         """
@@ -285,18 +285,40 @@ class Graph:
             for k in i:
                 liste_power.append(k[1])
 
-        valeur_sup = max(liste_power)
-        valeur_inf = min(liste_power)
-        pivot = int(np.percentile(liste_power, 50)) # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        liste_power.sort()
 
-        while valeur_sup != valeur_inf:
-            if self.get_path_with_power(src, dest, pivot) == None:
-                valeur_inf = pivot + 1
-                pivot = (valeur_inf + valeur_sup) // 2
+        # Enlever les doublons
+
+        l_power = [liste_power[0]]
+        for element in liste_power[1:]:
+            if element != l_power[-1]:
+                l_power.append(element)
+
+        def percentile(sorted_list, p):
+            for index, element in enumerate(sorted_list):
+                if element > np.percentile(sorted_list, p):
+                    return sorted_list[index - 1]
+
+        valeur_sup = l_power[-1]
+        valeur_inf = l_power[0]
+        pivot = percentile(liste_power, pourcentile) # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        ind_pivot = l_power.index(pivot)
+
+        # Se déplacer sur l_power et non sur l'ensemble des entiers naturels!
+
+        while True:
+            if self.get_path_with_power(src, dest, pivot) == None: # veut dire que la puissance pivot est trop petite
+                valeur_inf = l_power[ind_pivot + 1] # pivot + 1
+                if valeur_sup == valeur_inf:
+                    break
+                pivot = percentile(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50) # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                ind_pivot = l_power.index(pivot)           
             elif self.get_path_with_power(src, dest, pivot) != None:
                 valeur_sup = pivot
-                pivot = (valeur_inf + valeur_sup) // 2
-        
+                if valeur_sup == valeur_inf:
+                    break
+                pivot = percentile(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50)
+                ind_pivot = l_power.index(pivot)
         return self.get_path_with_power(src, dest, pivot), pivot 
 
 
@@ -364,13 +386,13 @@ class Graph:
         arbre_brut = kruskal(self.graph)
 
         # On trie les sommets du graphe
-        arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
+        # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
 
         return(arbre_brut)
 
 
-    def min_power_acm(self, src, dest):
-        return self.arbre_couvrant_min().min_power(src, dest)
+    def min_power_acm(self, src, dest, pourcentile=50):
+        return self.arbre_couvrant_min().min_power(src, dest, pourcentile)
 
 
 def graph_from_file(filename):
@@ -394,10 +416,10 @@ def graph_from_file(filename):
         An object of the class Graph with the graph from file_name.
     """
     with open(filename, "r") as file:
-        n, m = map(int, file.readline().split()) # pour network
-        # m = int(file.readline()) # pour routes
-        g = Graph([i for i in range(1, n+1)]) # pour network
-        # g = Graph() # pour routes
+        # n, m = map(int, file.readline().split()) # pour network
+        m = int(file.readline()) # pour routes
+        # g = Graph([i for i in range(1, n+1)]) # pour network
+        g = Graph() # pour routes
         for _ in range(m):
             edge = list(map(float, file.readline().split()))
             if len(edge) == 3:
