@@ -1,13 +1,12 @@
 from graph import Graph, graph_from_file
 
 
-data_path = "input/"
-file_name = "network.2.in"
+data_path = "delivery_network/"
+file_name = "test_gpwp.txt"
 
 g = graph_from_file(data_path + file_name)
-print(g.graph[1])
-print(g.graph[2])
 
+print(g.get_path_with_power(1,9,0.5))
 
 
 # test get_path_with_power

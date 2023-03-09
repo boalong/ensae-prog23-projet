@@ -112,7 +112,7 @@ class Graph:
         # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
         # DFS et reconstruire le chemin à partir des parents
 
-        def DFS_chemin(root,arrivee,visited):
+        def DFS_chemin(G,root,arrivee,visited):
 
             # Create a stack for DFS
             stack = []
@@ -134,7 +134,7 @@ class Graph:
                 # If a adjacent has not been visited, then push it
                 # to the stack.
                 # On les visitera plus tard
-                for node in self.graph[s]:
+                for node in G.graph[s]:
                     node = node[0]
                     if (not visited[node]):
                         stack.append(node)
@@ -144,9 +144,9 @@ class Graph:
                             return None
 
         parent = {i: None for i in nv_graphe.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
-        visited_nodes = {node:False for node in self.nodes}
+        visited_nodes = {node:False for node in nv_graphe.nodes}
 
-        DFS_chemin(src, dest, visited_nodes)
+        DFS_chemin(nv_graphe,src, dest, visited_nodes)
 
         # Récupérer le chemin à partir du dict parent
 
