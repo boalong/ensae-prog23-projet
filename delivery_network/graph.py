@@ -321,7 +321,7 @@ class Graph:
         return self.get_path_with_power(src, dest, pivot), pivot 
 
 
-    def arbre_couvrant_min(self):
+    def kruskal(self):
 
         def makeset(s):
             parent[s] = s
@@ -350,7 +350,7 @@ class Graph:
                     rang[r_y] = rang[r_y] + 1
     
 
-        def kruskal(G):
+        def kruskal_int(G):
         # Input: A connected undirected graph G = (V, E)
         # Output: A minimum spanning tree defined by the edges X
             for sommet in G.keys():
@@ -382,7 +382,7 @@ class Graph:
         parent = {}
         rang = {}
 
-        arbre_brut = kruskal(self.graph)
+        arbre_brut = kruskal_int(self.graph)
 
         # On trie les sommets du graphe
         # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
@@ -393,7 +393,7 @@ class Graph:
 
 
     def min_power_acm(self, src, dest, pourcentile=15):
-        return self.arbre_couvrant_min().min_power(src, dest, pourcentile)
+        return self.kruskal().min_power(src, dest, pourcentile)
 
 
 def graph_from_file(filename):
@@ -417,10 +417,10 @@ def graph_from_file(filename):
         An object of the class Graph with the graph from file_name.
     """
     with open(filename, "r") as file:
-        # n, m = map(int, file.readline().split()) # pour network
-        m = int(file.readline()) # pour routes
-        # g = Graph([i for i in range(1, n+1)]) # pour network
-        g = Graph() # pour routes
+        n, m = map(int, file.readline().split()) # pour network
+        # m = int(file.readline()) # pour routes
+        g = Graph([i for i in range(1, n+1)]) # pour network
+        # g = Graph() # pour routes
         for _ in range(m):
             edge = list(map(float, file.readline().split()))
             if len(edge) == 3:
@@ -432,3 +432,81 @@ def graph_from_file(filename):
             else:
                 raise Exception("Format incorrect")
     return g
+
+
+def kruskal(G): # G est un objet de la class Graph
+
+    def makeset(s):
+        parent[s] = s
+        rang[s] = 0
+
+    def sort_by_weight(list_edges):
+        return list_edges.sort(key = lambda x: x[2])
+
+    def find(s):
+        while s != parent[s] :
+            s = parent[s]
+        return s
+
+    def union(x,y):
+        r_x = find(x)
+        r_y = find(y)
+
+        # Si x et y sont déjà dans le même set
+        if r_x == r_y:
+            return None
+        if rang[r_x] > rang[r_y]:
+            parent[r_y] = r_x
+        else:
+            parent[r_x] = r_y
+            if rang[r_x] == rang[r_y]: 
+                rang[r_y] = rang[r_y] + 1
+    
+
+    def kruskal_int(graphe):
+    # Input: A connected undirected graph G = (V, E)
+    # Il faut faire kruskal sur chaque composante connexe
+    # Output: A minimum spanning tree defined by the edges X
+        for sommet in graphe.keys():
+        # for sommet in self.nodes:
+            makeset(sommet)
+        
+        # X est un graphe vide
+        X = Graph()
+    
+        # Créer une liste avec les noeuds et leur poids
+        liste_aretes = []
+        for sommet, arrivee in graphe.items():
+            for element in arrivee:
+                # On évite de mettre deux fois la même arête
+                if sommet < element[0]:
+                    liste_aretes.append([sommet, element[0], element[1], element[2]])
+    
+        # Sort the edges E by weight    
+        sort_by_weight(liste_aretes)
+            
+        for arete in liste_aretes:
+            if find(arete[0]) != find(arete[1]):
+                X.add_edge(arete[0],arete[1],arete[2],arete[3])
+                union(arete[0], arete[1])
+    
+        return X
+            
+    # Initialisation
+    parent = {}
+    rang = {}
+
+    arbre_brut = kruskal_int(G.graph)
+    
+    # 1ère composante connexe
+
+    for composante in G.connected_components():
+        # Transformer la composante en class.Graph
+
+
+    # On trie les sommets du graphe
+    # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
+
+    return(arbre_brut)
+    
+    # pas bon : marche seulement pour les composantes connexes !
