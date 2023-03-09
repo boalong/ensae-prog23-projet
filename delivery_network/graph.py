@@ -220,7 +220,6 @@ class Graph:
         '''
     
     
-
     def connected_components(self):
         list_components = []
 
@@ -281,7 +280,7 @@ class Graph:
 
         valeur_sup = max(liste_power)
         valeur_inf = min(liste_power)
-        pivot = int(np.percentile(liste_power, 50))
+        pivot = int(np.percentile(liste_power, 50)) # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
 
         while valeur_sup != valeur_inf:
             if self.get_path_with_power(src, dest, pivot) == None:
@@ -294,14 +293,14 @@ class Graph:
         return self.get_path_with_power(src, dest, pivot), pivot 
 
 
-    def arbre_couvrant_de_poids_min(self):
+    def arbre_couvrant_min(self):
 
         def makeset(s):
             parent[s] = s
             rang[s] = 0
 
         def sort_by_weight(list_edges):
-            return list_edges.sort(key = lambda x: x[3])
+            return list_edges.sort(key = lambda x: x[2])
 
         def find(s):
             while s != parent[s] :
@@ -360,7 +359,11 @@ class Graph:
         # On trie les sommets du graphe
         arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
 
-        return(arbre_brut)     
+        return(arbre_brut)
+
+
+    def min_power_acm(self, src, dest):
+        return self.arbre_couvrant_min().min_power(src, dest)
 
 
 def graph_from_file(filename):
