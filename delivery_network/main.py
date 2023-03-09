@@ -3,22 +3,34 @@ from graph import Graph, graph_from_file
 
 
 data_path = "input/"
-file_name = "network.10.in"
+file_name = "routes.10.in"
 
 g = graph_from_file(data_path + file_name)
 
+'''
 start = perf_counter()
-g.get_path_with_power(1,99999,6473280)
+# g.get_path_with_power(1,99999,6473280)
+g.min_power(1,99999)
 stop = perf_counter()
 print(str(stop-start))
 # 3 fois plus rapide que get_path_with_power sur acm
-
-start = perf_counter()
+'''
+'''
 nv_g = g.arbre_couvrant_min()
-nv_g.get_path_with_power(1,99999,6473280)
-# nv_g.min_power(1, 5)
+print(nv_g.nb_nodes,nv_g.nb_edges)
+print(len(nv_g.connected_components()))
+print(nv_g.connected_components()[1],len(nv_g.connected_components()[1]))
+'''
+
+print(g.get_path_with_power(55676, 62046,1000000))
+
+'''
+start = perf_counter()
+# nv_g.get_path_with_power(1,99999,6473280)
+g.min_power_acm(1,99999)
 stop = perf_counter()
 print(str(stop-start))
+'''
 
 
 

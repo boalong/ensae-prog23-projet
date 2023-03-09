@@ -10,7 +10,11 @@ g = graph_from_file(data_path + file_name)
 
 # print(g.arbre_couvrant_min())
 # print(g.arbre_couvrant_min().get_path_with_power(1,2,1001))
-# print(g.min_power_acm(1,2))
+'''
+# Vérification
+for i in range(101):
+    print(g.min_power_acm(1,2,i))
+'''
 
 liste_temps = [[] for i in range(101)]
 
@@ -24,7 +28,6 @@ for i in g.nodes:
                 g.min_power_acm(i,j,percentile)
                 stop = perf_counter()
                 liste_temps[percentile].append(stop-start)
-'''
 
 '''
 for i in g.nodes[0:2]:
@@ -36,6 +39,7 @@ for i in g.nodes[0:2]:
                 g.min_power_acm(i,j,percentile)
                 stop = perf_counter()
                 liste_temps[percentile].append(stop-start)
+'''
 
 liste_moyennes = []
 
@@ -52,7 +56,7 @@ plt.show()
 
 # pour regarder lequel est le plus efficace, on fait une moyenne de ses temps sur tout le graphe
 # ensuite on prend l'argmin
-'''
+
 
 '''
 start = perf_counter()

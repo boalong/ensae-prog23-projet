@@ -275,7 +275,7 @@ class Graph:
         return set(map(frozenset, self.connected_components()))
     
 
-    def min_power(self, src, dest, pourcentile=50):
+    def min_power(self, src, dest, pourcentile=15):
         """
         Should return path, min_power. 
         """
@@ -295,9 +295,12 @@ class Graph:
                 l_power.append(element)
 
         def percentile(sorted_list, p):
+            if len(sorted_list) == 1:
+                return sorted_list[0]
             for index, element in enumerate(sorted_list):
                 if element > np.percentile(sorted_list, p):
                     return sorted_list[index - 1]
+            return(sorted_list[-1])               
 
         valeur_sup = l_power[-1]
         valeur_inf = l_power[0]
@@ -306,17 +309,13 @@ class Graph:
 
         # Se déplacer sur l_power et non sur l'ensemble des entiers naturels!
 
-        while True:
+        while valeur_inf != valeur_sup:
             if self.get_path_with_power(src, dest, pivot) == None: # veut dire que la puissance pivot est trop petite
                 valeur_inf = l_power[ind_pivot + 1] # pivot + 1
-                if valeur_sup == valeur_inf:
-                    break
                 pivot = percentile(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50) # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
                 ind_pivot = l_power.index(pivot)           
             elif self.get_path_with_power(src, dest, pivot) != None:
                 valeur_sup = pivot
-                if valeur_sup == valeur_inf:
-                    break
                 pivot = percentile(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50)
                 ind_pivot = l_power.index(pivot)
         return self.get_path_with_power(src, dest, pivot), pivot 
@@ -389,9 +388,11 @@ class Graph:
         # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
 
         return(arbre_brut)
+    
+        # pas bon : marche seulement pour les composantes connexes !
 
 
-    def min_power_acm(self, src, dest, pourcentile=50):
+    def min_power_acm(self, src, dest, pourcentile=15):
         return self.arbre_couvrant_min().min_power(src, dest, pourcentile)
 
 
