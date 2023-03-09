@@ -150,8 +150,13 @@ class Graph:
 
         # Récupérer le chemin à partir du dict parent
 
+        # Si le sommet n'a pas été atteint par le parcours en profondeur
+        if parent[dest] == None:
+            return None
+
         chemin = [dest]
 
+        # Si le sommet a été atteint
         while parent[dest] != src:
             chemin.append(parent[dest])
             dest = parent[dest]      

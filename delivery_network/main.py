@@ -3,9 +3,10 @@ from graph import Graph, graph_from_file
 
 
 data_path = "input/"
-file_name = "network.1.in"
+file_name = "network.00.in"
 
 g = graph_from_file(data_path + file_name)
+
 
 start = perf_counter()
 print(g.min_power(1,4))
