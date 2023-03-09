@@ -509,4 +509,4 @@ def kruskal(G): # G est un objet de la class Graph
 
     return(arbre_brut)
     
-    # pas bon : marche seulement pour les composantes connexes ! 
+    # pas bon : marche seulement pour les composantes connexes !  
