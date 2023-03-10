@@ -3,13 +3,11 @@ from time import perf_counter
 from graph import Graph, graph_from_file, kruskal
 
 data_path = "input/"
-file_name = "network.05.in"
+file_name = "network.10.in"
 
 g = graph_from_file(data_path + file_name)
 
-print(g)
-
-print(kruskal(g).graph)
+print(g.min_power_acm(1,4))
 
 
 '''

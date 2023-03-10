@@ -94,6 +94,12 @@ class Graph:
         # pour trouver un chemin quelconque, on fait un deep search à partir de l'un des deux et on remonte à partir
         # second pour avoir un chemin
 
+        for ssgraphe in nv_graphe.connected_components():
+            if src in ssgraphe and dest not in ssgraphe:
+                return None
+            elif dest in ssgraphe and src not in ssgraphe:
+                return None
+
         '''
         for ssgraphe in nv_graphe.connected_components():
             if src in ssgraphe and dest in ssgraphe:
@@ -286,6 +292,7 @@ class Graph:
                 liste_power.append(k[1])
 
         liste_power.sort()
+        print(liste_power[:5])
 
         # Enlever les doublons
 
@@ -293,36 +300,37 @@ class Graph:
         for element in liste_power[1:]:
             if element != l_power[-1]:
                 l_power.append(element)
-
-        def percentile(sorted_list, p):
-            if len(sorted_list) == 1:
-                return sorted_list[0]
-            for index, element in enumerate(sorted_list):
-                if element > np.percentile(sorted_list, p):
-                    return sorted_list[index - 1]
-            return(sorted_list[-1])               
+        print("Doublons enlevés")    
 
         valeur_sup = l_power[-1]
         valeur_inf = l_power[0]
-        pivot = percentile(liste_power, pourcentile) # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        pivot = liste_power[int(0.15*len(liste_power))] # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        # la fonction percentile ne marche pas (bcp trop long), donc on va calculer le pct 15 manuellement
+        print(pivot)
         ind_pivot = l_power.index(pivot)
 
         # Se déplacer sur l_power et non sur l'ensemble des entiers naturels!
 
+        # liste_power[((len(liste_power)+1)//2)-1])
+
         while valeur_inf != valeur_sup:
+            print(len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)]))
             if self.get_path_with_power(src, dest, pivot) == None: # veut dire que la puissance pivot est trop petite
                 valeur_inf = l_power[ind_pivot + 1] # pivot + 1
-                pivot = percentile(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50) # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                pivot = l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)][((len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
                 ind_pivot = l_power.index(pivot)           
             elif self.get_path_with_power(src, dest, pivot) != None:
                 valeur_sup = pivot
-                pivot = percentile(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50)
+                pivot = l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)][((len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                # pivot = (l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50)
                 ind_pivot = l_power.index(pivot)
         return self.get_path_with_power(src, dest, pivot), pivot 
 
 
     def min_power_acm(self, src, dest, pourcentile=15):
-        return self.kruskal().min_power(src, dest, pourcentile)
+        kr = kruskal(self)
+        print(kr.nb_nodes, kr.nb_edges)
+        return kr.min_power(src, dest, pourcentile)
 
 
 def graph_from_file(filename):
@@ -346,10 +354,8 @@ def graph_from_file(filename):
         An object of the class Graph with the graph from file_name.
     """
     with open(filename, "r") as file:
-        n, m = map(int, file.readline().split()) # pour network
-        # m = int(file.readline()) # pour routes
-        g = Graph([i for i in range(1, n+1)]) # pour network
-        # g = Graph() # pour routes
+        n, m = map(int, file.readline().split())
+        g = Graph([i for i in range(1, n+1)])
         for _ in range(m):
             edge = list(map(float, file.readline().split()))
             if len(edge) == 3:
@@ -389,8 +395,7 @@ def kruskal(G): # G est un objet de la class Graph
         else:
             parent[r_x] = r_y
             if rang[r_x] == rang[r_y]: 
-                rang[r_y] = rang[r_y] + 1
-    
+                rang[r_y] = rang[r_y] + 1    
 
     def kruskal_int(graphe):
     # Input: A connected undirected graph G = (V, E)
@@ -402,7 +407,6 @@ def kruskal(G): # G est un objet de la class Graph
         
         # X est un graphe vide
         X = Graph([])
-        print(X)
 
         # Créer une liste avec les noeuds et leur poids
         liste_aretes = []

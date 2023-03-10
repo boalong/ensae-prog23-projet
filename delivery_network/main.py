@@ -3,9 +3,11 @@ from graph import Graph, graph_from_file
 
 
 data_path = "input/"
-file_name = "routes.10.in"
+file_name = "network.10.in"
 
 g = graph_from_file(data_path + file_name)
+
+print(g.min_power_acm(1,4))
 
 '''
 start = perf_counter()
