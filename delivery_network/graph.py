@@ -483,7 +483,7 @@ class Graph:
         # liste_power[((len(liste_power)+1)//2)-1])
 
         while valeur_inf != valeur_sup:
-            print(len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)]))
+            # print(len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)]))
             if self.is_path_with_power(src, dest, pivot) == False: # veut dire que la puissance pivot est trop petite
                 valeur_inf = l_power[ind_pivot + 1] # pivot + 1
                 pivot = l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)][((len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
