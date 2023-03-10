@@ -7,7 +7,9 @@ file_name = "network.10.in"
 
 g = graph_from_file(data_path + file_name)
 
-print(g.min_power_acm(1,4))
+# print(g.min_power_acm(1,4))
+g.liste_power()
+print(len(g.list_power))
 
 
 '''

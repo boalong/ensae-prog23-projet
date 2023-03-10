@@ -142,6 +142,8 @@ class Graph:
                 # If a adjacent has not been visited, then push it
                 # to the stack.
                 # On les visitera plus tard
+
+                # ne pas faire une copie du graphe : seulement rajouter une condition
                 for node in G.graph[s]:
                     node = node[0]
                     if (not visited[node]):
@@ -324,8 +326,100 @@ class Graph:
         return self.get_path_with_power(src, dest, pivot), pivot 
 
 
+    def is_path_with_power(self, src, dest, power):
+        # retourne True ou False
+        # on regarde seulement si le trajet peut être couvert
+
+        # graphe avec seulement les arêtes que peut emprunter le camion étant donnée sa puissance
+        # faire attention à ne pas ajouter 2 fois la même arête
+        nv_graphe = Graph([i for i in self.nodes])
+        for sommet, aretes in self.graph.items():
+            for arete in aretes:
+                if sommet < arete[0]:
+                    if arete[1] <= power:
+                        nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
+   
+        # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
+        # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
+        # il y a un chemin entre eux
+        # pour trouver un chemin quelconque, on fait un deep search à partir de l'un des deux et on remonte à partir
+        # second pour avoir un chemin
+
+        for ssgraphe in nv_graphe.connected_components():
+            if src in ssgraphe and dest in ssgraphe:
+                return True
+            elif src in ssgraphe and dest not in ssgraphe:
+                return False
+            elif dest in ssgraphe and src not in ssgraphe:
+                return False
+
+
+    def liste_power(self):
+        '''
+        Renvoie une liste avec les puissances du graphe triées.
+        Va permettre d'optimiser pour calc
+        '''
+        liste = []
+        # on pourra garder une seule liste_power pour tout le graphe que l'on stockera si on fait plusieurs fois dans le même graphe
+
+        for i in self.graph.values():
+            for k in i:
+                liste.append(k[1])
+
+        liste.sort()
+
+        # Enlever les doublons
+
+        l_power = [liste[0]]
+        for element in liste[1:]:
+            if element != l_power[-1]:
+                l_power.append(element)
+        
+        self.list_power = l_power
+
+
+    def min_power_opti(self, src, dest, pourcentile=15):
+        """
+        Should return path, min_power. 
+        """
+        if self.list_power == None:
+            self.liste_power()
+
+        l_power = self.list_power
+
+        valeur_sup = l_power[-1]
+        valeur_inf = l_power[0]
+        pivot = l_power[int((pourcentile/100)*len(l_power))] # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        # la fonction percentile ne marche pas (bcp trop long), donc on va calculer le pct 15 manuellement
+        ind_pivot = l_power.index(pivot)
+
+        # Se déplacer sur l_power et non sur l'ensemble des entiers naturels!
+
+        # liste_power[((len(liste_power)+1)//2)-1])
+
+        while valeur_inf != valeur_sup:
+            print(len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)]))
+            if self.is_path_with_power(src, dest, pivot) == False: # veut dire que la puissance pivot est trop petite
+                valeur_inf = l_power[ind_pivot + 1] # pivot + 1
+                pivot = l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)][((len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                ind_pivot = l_power.index(pivot)           
+            elif self.is_path_with_power(src, dest, pivot) == True:
+                valeur_sup = pivot
+                pivot = l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)][((len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                # pivot = (l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50)
+                ind_pivot = l_power.index(pivot)
+        return self.get_path_with_power(src, dest, pivot), pivot 
+
     def min_power_acm(self, src, dest, pourcentile=15):
+
+        # modifier get_path_with_power pour ne pas calculer le chemin à chaque fois mais renvoyer seulement True ou False
+        # pour continuer la recherche binaire
+
         return kruskal(self).min_power(src, dest, pourcentile)
+    
+    def min_power_opti_acm(self, src, dest, pourcentile=15):
+
+        return kruskal(self).min_power_opti(src, dest, pourcentile)
 
 
 def graph_from_file(filename):
