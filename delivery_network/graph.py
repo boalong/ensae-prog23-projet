@@ -292,21 +292,18 @@ class Graph:
                 liste_power.append(k[1])
 
         liste_power.sort()
-        print(liste_power[:5])
 
         # Enlever les doublons
 
         l_power = [liste_power[0]]
         for element in liste_power[1:]:
             if element != l_power[-1]:
-                l_power.append(element)
-        print("Doublons enlevés")    
+                l_power.append(element) 
 
         valeur_sup = l_power[-1]
         valeur_inf = l_power[0]
-        pivot = liste_power[int(0.15*len(liste_power))] # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        pivot = liste_power[int((pourcentile/100)*len(liste_power))] # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
         # la fonction percentile ne marche pas (bcp trop long), donc on va calculer le pct 15 manuellement
-        print(pivot)
         ind_pivot = l_power.index(pivot)
 
         # Se déplacer sur l_power et non sur l'ensemble des entiers naturels!
@@ -328,9 +325,7 @@ class Graph:
 
 
     def min_power_acm(self, src, dest, pourcentile=15):
-        kr = kruskal(self)
-        print(kr.nb_nodes, kr.nb_edges)
-        return kr.min_power(src, dest, pourcentile)
+        return kruskal(self).min_power(src, dest, pourcentile)
 
 
 def graph_from_file(filename):
