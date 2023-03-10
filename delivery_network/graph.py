@@ -74,7 +74,7 @@ class Graph:
         self.nb_edges += 1
     
 
-    def get_path_with_power(self, src, dest, power):
+    def get_path_with_power_old(self, src, dest, power):
         
         
         # on commence par regarder si le trajet peut être couvert
@@ -99,23 +99,6 @@ class Graph:
                 return None
             elif dest in ssgraphe and src not in ssgraphe:
                 return None
-
-        '''
-        for ssgraphe in nv_graphe.connected_components():
-            if src in ssgraphe and dest in ssgraphe:
-                ind_min = min(ssgraphe.index(src), ssgraphe.index(dest))
-                ind_max = max(ssgraphe.index(src), ssgraphe.index(dest))
-                chemin = [ssgraphe[i] for i in range(ind_min, ind_max+1)]
-                break
-            elif src in ssgraphe and dest not in ssgraphe:
-                chemin = None
-                break
-            elif dest in ssgraphe and src not in ssgraphe:
-                chemin = None
-                break
-
-        return chemin
-        '''
 
         # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
         # DFS et reconstruire le chemin à partir des parents
@@ -157,6 +140,81 @@ class Graph:
         visited_nodes = {node:False for node in nv_graphe.nodes}
 
         DFS_chemin(nv_graphe,src, dest, visited_nodes)
+
+        # Récupérer le chemin à partir du dict parent
+
+        # Si le sommet n'a pas été atteint par le parcours en profondeur
+        if parent[dest] == None:
+            return None
+
+        chemin = [dest]
+
+        # Si le sommet a été atteint
+        while parent[dest] != src:
+            chemin.append(parent[dest])
+            dest = parent[dest]      
+
+        chemin.append(src)
+
+        chemin.reverse()
+
+        return chemin
+
+
+    def get_path_with_power(self, src, dest, power):                       
+        # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
+        # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
+        # il y a un chemin entre eux
+        # pour trouver un chemin quelconque, on fait un deep search à partir de l'un des deux et on remonte à partir
+        # second pour avoir un chemin
+
+        '''
+        for ssgraphe in self.connected_components():
+            if src in ssgraphe and dest not in ssgraphe:
+                return None
+            elif dest in ssgraphe and src not in ssgraphe:
+                return None
+        '''
+
+        # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
+        # DFS et reconstruire le chemin à partir des parents
+
+        def DFS_chemin(G,root,arrivee,visited):
+
+            # Create a stack for DFS
+            stack = []
+ 
+            # Push the current source node.
+            stack.append(root)
+ 
+            while (len(stack)):
+                # Pop a vertex from stack
+                s = stack.pop()
+ 
+                # Stack may contain same vertex twice. So
+                # we need to add the popped item to the list only
+                # if it is not visited.
+                if (not visited[s]):
+                    visited[s] = True
+ 
+                # Get all adjacent vertices of the popped vertex s
+                # If a adjacent has not been visited, then push it
+                # to the stack.
+                # On les visitera plus tard
+
+                # ne pas faire une copie du graphe : seulement rajouter une condition
+                for node in G.graph[s]:
+                    if (node[1] <= power) and (not visited[node[0]]):
+                        stack.append(node[0])
+                        parent[node[0]] = s
+                        if node[0] == arrivee:
+                        # Dans ce cas, on peut arrêter le pgrm car on a tout ce qu'il faut pour avoir notre chemin
+                            return None
+
+        parent = {i: None for i in self.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
+        visited_nodes = {node: False for node in self.nodes}
+
+        DFS_chemin(self, src, dest, visited_nodes)
 
         # Récupérer le chemin à partir du dict parent
 
@@ -283,7 +341,7 @@ class Graph:
         return set(map(frozenset, self.connected_components()))
     
 
-    def min_power(self, src, dest, pourcentile=15):
+    def min_power_old(self, src, dest, pourcentile=15):
         """
         Should return path, min_power. 
         """
@@ -330,31 +388,56 @@ class Graph:
         # retourne True ou False
         # on regarde seulement si le trajet peut être couvert
 
-        # graphe avec seulement les arêtes que peut emprunter le camion étant donnée sa puissance
-        # faire attention à ne pas ajouter 2 fois la même arête
-        nv_graphe = Graph([i for i in self.nodes])
-        for sommet, aretes in self.graph.items():
-            for arete in aretes:
-                if sommet < arete[0]:
-                    if arete[1] <= power:
-                        nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
-   
-        # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
-        # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
-        # il y a un chemin entre eux
-        # pour trouver un chemin quelconque, on fait un deep search à partir de l'un des deux et on remonte à partir
-        # second pour avoir un chemin
+        # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
+        # DFS et reconstruire le chemin à partir des parents
 
-        for ssgraphe in nv_graphe.connected_components():
-            if src in ssgraphe and dest in ssgraphe:
-                return True
-            elif src in ssgraphe and dest not in ssgraphe:
-                return False
-            elif dest in ssgraphe and src not in ssgraphe:
-                return False
+        def DFS_chemin(G,root,arrivee,visited):
+
+            # Create a stack for DFS
+            stack = []
+ 
+            # Push the current source node.
+            stack.append(root)
+ 
+            while (len(stack)):
+                # Pop a vertex from stack
+                s = stack.pop()
+ 
+                # Stack may contain same vertex twice. So
+                # we need to add the popped item to the list only
+                # if it is not visited.
+                if (not visited[s]):
+                    visited[s] = True
+ 
+                # Get all adjacent vertices of the popped vertex s
+                # If a adjacent has not been visited, then push it
+                # to the stack.
+                # On les visitera plus tard
+
+                # ne pas faire une copie du graphe : seulement rajouter une condition
+                for node in G.graph[s]:
+                    if (node[1] <= power) and (not visited[node[0]]):
+                        stack.append(node[0])
+                        parent[node[0]] = s
+                        if node[0] == arrivee:
+                        # Dans ce cas, on peut arrêter le pgrm car on a tout ce qu'il faut pour avoir notre chemin
+                            return None
+
+        parent = {i: None for i in self.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
+        visited_nodes = {node: False for node in self.nodes}
+
+        DFS_chemin(self, src, dest, visited_nodes)
+
+        # Récupérer le chemin à partir du dict parent
+
+        # Si le sommet n'a pas été atteint par le parcours en profondeur
+        if parent[dest] == None:
+            return False
+        
+        return True
 
 
-    def liste_power(self):
+    def get_liste_power(self):
         '''
         Renvoie une liste avec les puissances du graphe triées.
         Va permettre d'optimiser pour calc
@@ -375,17 +458,19 @@ class Graph:
             if element != l_power[-1]:
                 l_power.append(element)
         
-        self.list_power = l_power
+        self.liste_power = l_power
 
 
-    def min_power_opti(self, src, dest, pourcentile=15):
+    def min_power(self, src, dest, pourcentile=15):
         """
         Should return path, min_power. 
         """
-        if self.list_power == None:
-            self.liste_power()
+        try:
+            type(self.liste_power)
+        except:
+            self.get_liste_power()
 
-        l_power = self.list_power
+        l_power = self.liste_power
 
         valeur_sup = l_power[-1]
         valeur_inf = l_power[0]
@@ -410,16 +495,19 @@ class Graph:
                 ind_pivot = l_power.index(pivot)
         return self.get_path_with_power(src, dest, pivot), pivot 
 
-    def min_power_acm(self, src, dest, pourcentile=15):
-
-        # modifier get_path_with_power pour ne pas calculer le chemin à chaque fois mais renvoyer seulement True ou False
-        # pour continuer la recherche binaire
-
-        return kruskal(self).min_power(src, dest, pourcentile)
     
-    def min_power_opti_acm(self, src, dest, pourcentile=15):
+    def get_kruskal(self):
+        self.kruskal = kruskal(self)
 
-        return kruskal(self).min_power_opti(src, dest, pourcentile)
+
+    def min_power_acm(self, src, dest, pourcentile=15):
+        # regarder si on a déjà enregistré kruskal
+        try:
+            type(self.kruskal)
+        except:
+            self.get_kruskal()
+
+        return self.kruskal.min_power(src, dest, pourcentile)
 
 
 def graph_from_file(filename):
@@ -525,48 +613,3 @@ def kruskal(G): # G est un objet de la class Graph
     # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
 
     return arbre_brut
-
-    '''
-    En fait, ça marchait très bien avec la fonction précédente
-    # arbre_brut = kruskal_int(G.graph)
-    liste_arbres = []
-    
-    # 1ère composante connexe
-
-    for composante in G.connected_components():
-        # Transformer la composante en class.Graph
-        # Faire un graphe avec seulement les composantes connexes
-        gr_composante = Graph()
-        for sommet in composante: # les sommets sont les clés du graphe
-            for arete in G.graph[sommet]:
-                # on évite de faire des doublons
-                if sommet < arete[0]:
-                    gr_composante.add_edge(sommet, arete[0], arete[1], arete[2])
-        # c'est bon, on a notre graphe avec seulement les composantes connexes
-        # Procédure kruskal_int
-        parent = {}
-        rang = {}
-        liste_arbres.append(kruskal_int(gr_composante.graph))
-
-    # maintenant, il faut fusionner les graphes de liste_arbres
-
-    arbre_final = Graph()
-
-    for arbre_interm in liste_arbres:
-        for sommet, aretes in arbre_interm.graph.items():
-            for arete in aretes:
-                if sommet < arete[0]:
-                    arbre_final.add_edge(sommet, arete[0], arete[1], arete[2])
-
-    # On trie les sommets du graphe
-    # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
-
-    return(arbre_final)
-    
-    # renvoie un acm pour la 1ère composante connexe
-
-    # si on des acm pour toutes les composantes connexes, il suffit de les fusionner en ajoutant les noeud au 1er
-    # arbre couvrant
-
-    # pas bon : marche seulement pour les composantes connexes !  
-    '''

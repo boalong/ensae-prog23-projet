@@ -2,15 +2,24 @@ import numpy as np
 from time import perf_counter
 from graph import Graph, graph_from_file, kruskal
 
+g = graph_from_file("delivery_network/test_gpwp_opti.txt")
+
+print(g.get_path_with_power(1,3,2))
+print(g.get_path_with_power(1,3,1))
+
+print(g.get_path_with_power_old(1,3,2))
+print(g.get_path_with_power_old(1,3,1))
+
+'''
 data_path = "input/"
 file_name = "network.10.in"
 
 g = graph_from_file(data_path + file_name)
 
 # print(g.min_power_acm(1,4))
-g.liste_power()
-print(len(g.list_power))
-
+# g.liste_power()
+# print(len(g.list_power))
+'''
 
 '''
 print(g.nb_nodes)
@@ -59,24 +68,27 @@ print(str(stop-start))
 '''
 
 
-'''
+
 data_path = "input/"
-file_name = "network.1.in"
+file_name = "network.10.in"
 
 g = graph_from_file(data_path + file_name)
 
 
 start = perf_counter()
-print(g.get_path_with_power(1,9,30))
+print(g.get_path_with_power(1,9,3989041))
 stop = perf_counter()
 print(str(stop-start))
 
 
 start = perf_counter()
-print(g.arbre_couvrant_min())
-print(g.arbre_couvrant_min().get_path_with_power(1,9,30))
+print(g.get_path_with_power_old(1,9,3989041))
+# print(g.arbre_couvrant_min())
+# print(g.arbre_couvrant_min().get_path_with_power(1,9,30))
 stop = perf_counter()
 print(str(stop-start))
+
+
 
 # c'est systématiquement plus long sur l'arbre couvrant minimal
 # c'est peut-être dû à la structure en forme d'arbre qui ralentit le DFS
@@ -92,4 +104,3 @@ print(str(stop-start))
 
 # print(g.arbre_couvrant_de_poids_min())
 
-'''
