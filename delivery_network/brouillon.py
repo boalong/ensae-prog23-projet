@@ -1,14 +1,18 @@
 import numpy as np
 from time import perf_counter
-from graph import Graph, graph_from_file
-
-print('Hello world')
+from graph import Graph, graph_from_file, kruskal
 
 data_path = "input/"
-file_name = "routes.10.in"
+file_name = "network.05.in"
 
 g = graph_from_file(data_path + file_name)
 
+print(g)
+
+print(kruskal(g).graph)
+
+
+'''
 print(g.nb_nodes)
 print(g.nb_edges)
 
@@ -17,6 +21,8 @@ start = perf_counter()
 # print(g.min_power_acm(1,2))
 stop = perf_counter()
 print(stop-start)
+'''
+
 
 # on peut compléter une matrice en l'initialisant avec np.zeros
 

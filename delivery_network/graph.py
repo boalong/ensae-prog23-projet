@@ -321,77 +321,6 @@ class Graph:
         return self.get_path_with_power(src, dest, pivot), pivot 
 
 
-    def kruskal(self):
-
-        def makeset(s):
-            parent[s] = s
-            rang[s] = 0
-
-        def sort_by_weight(list_edges):
-            return list_edges.sort(key = lambda x: x[2])
-
-        def find(s):
-            while s != parent[s] :
-                s = parent[s]
-            return s
-
-        def union(x,y):
-            r_x = find(x)
-            r_y = find(y)
-
-            # Si x et y sont déjà dans le même set
-            if r_x == r_y:
-                return None
-            if rang[r_x] > rang[r_y]:
-                parent[r_y] = r_x
-            else:
-                parent[r_x] = r_y
-                if rang[r_x] == rang[r_y]: 
-                    rang[r_y] = rang[r_y] + 1
-    
-
-        def kruskal_int(G):
-        # Input: A connected undirected graph G = (V, E)
-        # Output: A minimum spanning tree defined by the edges X
-            for sommet in G.keys():
-            # for sommet in self.nodes:
-                makeset(sommet)
-        
-            # X est un graphe vide
-            X = Graph()
-    
-            # Créer une liste avec les noeuds et leur poids
-            liste_aretes = []
-            for sommet, arrivee in G.items():
-                for element in arrivee:
-                    # On évite de mettre deux fois la même arête
-                    if sommet < element[0]:
-                        liste_aretes.append([sommet, element[0], element[1], element[2]])
-    
-            # Sort the edges E by weight    
-            sort_by_weight(liste_aretes)
-            
-            for arete in liste_aretes:
-                if find(arete[0]) != find(arete[1]):
-                    X.add_edge(arete[0],arete[1],arete[2],arete[3])
-                    union(arete[0], arete[1])
-    
-            return X
-            
-        # Initialisation
-        parent = {}
-        rang = {}
-
-        arbre_brut = kruskal_int(self.graph)
-
-        # On trie les sommets du graphe
-        # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
-
-        return(arbre_brut)
-    
-        # pas bon : marche seulement pour les composantes connexes !
-
-
     def min_power_acm(self, src, dest, pourcentile=15):
         return self.kruskal().min_power(src, dest, pourcentile)
 
@@ -472,8 +401,9 @@ def kruskal(G): # G est un objet de la class Graph
             makeset(sommet)
         
         # X est un graphe vide
-        X = Graph()
-    
+        X = Graph([])
+        print(X)
+
         # Créer une liste avec les noeuds et leur poids
         liste_aretes = []
         for sommet, arrivee in graphe.items():
@@ -491,22 +421,59 @@ def kruskal(G): # G est un objet de la class Graph
                 union(arete[0], arete[1])
     
         return X
-            
+
     # Initialisation
     parent = {}
     rang = {}
 
     arbre_brut = kruskal_int(G.graph)
+
+    # On trie les sommets du graphe pour passer les tests unitaires
+    # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
+
+    return arbre_brut
+
+    '''
+    En fait, ça marchait très bien avec la fonction précédente
+    # arbre_brut = kruskal_int(G.graph)
+    liste_arbres = []
     
     # 1ère composante connexe
 
     for composante in G.connected_components():
         # Transformer la composante en class.Graph
+        # Faire un graphe avec seulement les composantes connexes
+        gr_composante = Graph()
+        for sommet in composante: # les sommets sont les clés du graphe
+            for arete in G.graph[sommet]:
+                # on évite de faire des doublons
+                if sommet < arete[0]:
+                    gr_composante.add_edge(sommet, arete[0], arete[1], arete[2])
+        # c'est bon, on a notre graphe avec seulement les composantes connexes
+        # Procédure kruskal_int
+        parent = {}
+        rang = {}
+        liste_arbres.append(kruskal_int(gr_composante.graph))
 
+    # maintenant, il faut fusionner les graphes de liste_arbres
+
+    arbre_final = Graph()
+
+    for arbre_interm in liste_arbres:
+        for sommet, aretes in arbre_interm.graph.items():
+            for arete in aretes:
+                if sommet < arete[0]:
+                    arbre_final.add_edge(sommet, arete[0], arete[1], arete[2])
 
     # On trie les sommets du graphe
     # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
 
-    return(arbre_brut)
+    return(arbre_final)
     
+    # renvoie un acm pour la 1ère composante connexe
+
+    # si on des acm pour toutes les composantes connexes, il suffit de les fusionner en ajoutant les noeud au 1er
+    # arbre couvrant
+
     # pas bon : marche seulement pour les composantes connexes !  
+    '''

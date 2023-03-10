@@ -27,8 +27,9 @@ class Test_MST(unittest.TestCase):
         mst_expected = {1: [(3, 2, 1), (4, 4, 1), (2, 6, 1)],
                         2: [(1, 6, 1)],
                         3: [(1, 2, 1)],
-                        4: [(1, 4, 1)],
+                        4: [(1, 4, 1)]
                         }
+        print(g_mst.graph, mst_expected)
         self.assertEqual(g_mst.graph, mst_expected)
 
 if __name__ == '__main__':
