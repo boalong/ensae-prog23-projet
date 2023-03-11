@@ -386,7 +386,15 @@ class Graph:
 
     def is_path_with_power(self, src, dest, power):
         # retourne True ou False
-        # on regarde seulement si le trajet peut être couvert
+        # on regarde seulement si le trajet peut être couvert en regardant si les deux sommets sont dans la même composante connexe
+        
+        '''
+        for cc in self.connected_components_set():
+            if src in cc and dest in cc:
+                return True
+            elif (src not in cc and dest in cc) or (src in cc and dest not in cc):
+                return False
+        '''
 
         # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
         # DFS et reconstruire le chemin à partir des parents
@@ -508,7 +516,114 @@ class Graph:
             self.get_kruskal()
 
         return self.kruskal.min_power(src, dest, pourcentile)
+    
 
+    def connected_components_with_power(self, power):
+
+        list_components = []
+
+        def DFS(root,visited):
+
+            # Create a stack for DFS
+            stack = []
+ 
+            # Push the current source node.
+            stack.append(root)
+ 
+            while (len(stack)):
+                # Pop a vertex from stack and print it
+                s = stack.pop()
+ 
+                # Stack may contain same vertex twice. So
+                # we need to add the popped item to the list only
+                # if it is not visited.
+                if (not visited[s]):
+                    list_components[-1].append(s)
+                    visited[s] = True
+ 
+                # Get all adjacent vertices of the popped vertex s
+                # If a adjacent has not been visited, then push it
+                # to the stack.
+                for node in self.graph[s]:
+                    if (node[1] <= power) and (not visited[node[0]]):
+                        stack.append(node[0])
+                        
+        visited_nodes = {node:False for node in self.nodes}
+
+        for i in self.graph.keys():
+            if (not visited_nodes[i]):
+                list_components.append([])
+                DFS(i, visited_nodes)
+            
+        return list_components
+
+
+    def connected_components_set_with_power(self, power):
+        """
+        The result should be a set of frozensets (one per component), 
+        For instance, for network01.in: {frozenset({1, 2, 3}), frozenset({4, 5, 6, 7})}
+        """
+        return set(map(frozenset, self.connected_components_with_power(power)))
+    
+    
+    def get_dict_frozenset_connected_components_with_power(self):
+        
+        try:
+            dict_power = {power: None for power in self.liste_power}
+        except:
+            self.get_liste_power()
+            dict_power = {power: None for power in self.liste_power}
+        
+        for power in self.liste_power:
+            print(power)
+            dict_power[power] = self.connected_components_set_with_power(power)
+        
+        self.dict_frozenset_connected_components_with_power = dict_power
+
+
+    def is_path_with_power_frozenset(self, src, dest, power):
+        # on suppose que l'on a déjà enregistré dict_frozenset_connected_components_with_power
+        for component in self.dict_frozenset_connected_components_with_power[power]:
+            if (src in component) and (dest in component):
+                return True
+            elif ((src in component) and (dest not in component)) or ((src not in component) and (dest in component)):
+                return False
+
+
+    def min_power_with_frozenset(self, src, dest, pourcentile=15):
+        """
+        Should return path, min_power. 
+        """
+        # regarder si on a déjà enregistré dict_frozenset_connected_components_with_power
+        try:
+            type(self.dict_frozenset_connected_components_with_power)
+        except:
+            self.get_dict_frozenset_connected_components_with_power()
+        
+        # on a enregistré dict_frozenset_connected_components_with_power, donc on self.liste_power
+
+        valeur_sup = self.liste_power[-1]
+        valeur_inf = self.liste_power[0]
+        pivot = self.liste_power[int((pourcentile/100)*len(self.liste_power))] # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        # la fonction percentile ne marche pas (bcp trop long), donc on va calculer le pct 15 manuellement
+        ind_pivot = self.liste_power.index(pivot)
+
+        # Se déplacer sur l_power et non sur l'ensemble des entiers naturels!
+
+        # liste_power[((len(liste_power)+1)//2)-1])
+
+        while valeur_inf != valeur_sup:
+            # print(len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)]))
+            if self.is_path_with_power_frozenset(src, dest, pivot) == False: # veut dire que la puissance pivot est trop petite
+                valeur_inf = self.liste_power[ind_pivot + 1] # pivot + 1
+                pivot = self.liste_power[self.liste_power.index(valeur_inf) : (self.liste_power.index(valeur_sup)+1)][((len(self.liste_power[self.liste_power.index(valeur_inf) : (self.liste_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                ind_pivot = self.liste_power.index(pivot)           
+            elif self.is_path_with_power_frozenset(src, dest, pivot) == True:
+                valeur_sup = pivot
+                pivot = self.liste_power[self.liste_power.index(valeur_inf) : (self.liste_power.index(valeur_sup)+1)][((len(self.liste_power[self.liste_power.index(valeur_inf) : (self.liste_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                # pivot = (l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50)
+                ind_pivot = self.liste_power.index(pivot)
+        return self.get_path_with_power(src, dest, pivot), pivot         
 
 def graph_from_file(filename):
     """
