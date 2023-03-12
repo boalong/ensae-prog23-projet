@@ -198,7 +198,8 @@ def kruskal(G):
     for x in G.graph.keys():
         for y in G.graph[x]:
             edges_list.append((x,y[0],y[1]))
-    A = sorted(edges_list, key=lambda x:[2])
+    edges = list(set(edges_list))
+    A = sorted(edges, key=lambda x:[2])
     CC = [i for i in range(n)]
     T = []
     compteurT = 0

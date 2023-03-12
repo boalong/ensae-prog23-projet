@@ -8,6 +8,9 @@ file_no = "10.in"
 
 g = graph_from_file(data_path + "network." + file_no)
 
+G = kruskal(g)
+print(G.nb_nodes, G.nb_edges)
+
 # Calculer les min_power de toutes les routes
 # pour optimiser le process, il faut stocker une liste min power pour tout le graphe
 # on va associer une méthode liste power pour calculer une fois pour toute
