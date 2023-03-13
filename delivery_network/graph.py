@@ -625,6 +625,192 @@ class Graph:
                 ind_pivot = self.liste_power.index(pivot)
         return self.get_path_with_power(src, dest, pivot), pivot         
 
+
+    def min_power_kruskal(self, src, dest):
+        # regarder si kruskal est déjà enregistré
+        try:
+            type(self.kruskal)
+        except:
+            self.get_kruskal()
+
+        def DFS_min_power_kruskal(G,root,arrivee,visited,parent):
+            # s'arrête dès qu'on a atteint le sommet d'arrivée
+
+            # Create a stack for DFS
+            stack = []
+ 
+            # Push the current source node.
+            stack.append(root)
+ 
+            while (len(stack)):
+                # Pop a vertex from stack
+                s = stack.pop()
+ 
+                # Stack may contain same vertex twice. So
+                # we need to add the popped item to the list only
+                # if it is not visited.
+                if (not visited[s]):
+                    visited[s] = True
+ 
+                # Get all adjacent vertices of the popped vertex s
+                # If a adjacent has not been visited, then push it
+                # to the stack.
+                # On les visitera plus tard
+
+                # ne pas faire une copie du graphe : seulement rajouter une condition
+                for node in G.graph[s]:
+                    if (not visited[node[0]]):
+                        stack.append(node[0])
+                        parent[node[0]] = s
+                        if node[0] == arrivee:
+                        # Dans ce cas, on peut arrêter le pgrm car on a tout ce qu'il faut pour avoir notre chemin
+                            return None
+
+        parent = {i: None for i in self.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
+        visited = {i: False for i in self.nodes}
+
+        DFS_min_power_kruskal(self.kruskal, src, dest, visited, parent)
+
+        # Récupérer le chemin à partir du dict parent
+
+        '''
+        # Si le sommet n'a pas été atteint par le parcours en profondeur
+        if parent[dest] == None:
+            return None
+        '''
+
+        chemin = []
+
+        chemin.append(dest)
+
+        # Si le sommet a été atteint, on reconstitue le chemin et on enregistre la puissance minimal requise
+        pwr = 0
+        while dest != src:
+            chemin.append(parent[dest])
+            # regarder si l'arête qu'on parcourt actuellement a une puissance supérieure à la puissance requise jusqu'ici
+            for adjacent in self.graph[dest]:
+                if adjacent[0] == parent[dest]:
+                    # print(dest, adjacent[0])
+                    # print(adjacent[1])
+                    if adjacent[1] > pwr:
+                        # print('Changement de puissance min :' + str(adjacent[1]))
+                        pwr = adjacent[1]
+                    break
+            dest = parent[dest]
+
+        chemin.reverse()
+
+        return chemin, pwr
+    
+
+    def DFS_parents(self, root=1):
+        '''On fait un seul parcours en profondeur pour récupérer tous les liens de parenté à partir du sommet root'''
+        # Initialisation
+        parent = {i: None for i in self.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
+        visited = {i: False for i in self.nodes}
+
+        # Create a stack for DFS
+        stack = []
+ 
+        # Push the current source node.
+        stack.append(root)
+ 
+        while (len(stack)):
+            # Pop a vertex from stack
+            s = stack.pop()
+ 
+            # Stack may contain same vertex twice. So
+            # we need to add the popped item to the list only
+            # if it is not visited.
+            if (not visited[s]):
+                visited[s] = True
+ 
+            # ne pas faire une copie du graphe : seulement rajouter une condition
+            for node in self.graph[s]:
+                if (not visited[node[0]]):
+                    stack.append(node[0])
+                    parent[node[0]] = s
+
+        return parent
+    
+
+    def min_power_routes(self, liste_routes, root=1):
+        '''Pour obtenir une liste des min_power pour toutes le routes demandées'''
+        # liste_routes est une liste de 3 éléments : le 1er est le départ, le 2ème est l'arrivée, le 3ème est l'utilité
+
+        self.get_kruskal()
+        parent = self.kruskal.DFS_parents(root)
+
+        # On initialise l'output
+        liste_trajets = []
+        liste_power = []
+
+        ct = 0
+        for route in liste_routes:
+            ct += 1
+            # print(ct)
+            if ct == 1001:
+                return liste_trajets, liste_power
+            
+            src = int(route[0])
+            dest = int(route[1])
+
+            chemin = []
+            chemin.append(dest)
+
+            pwr = 0
+
+            # Procédure pour reconstituer le trajet si src est différent de la root du DFS
+
+            # On reconstitue les chemins jusqu'à la root pour src et dest:
+
+            chemin = []
+            chemin.append(src)
+            while src != root:
+                chemin.append(parent[src])
+                src = parent[src]
+
+            chemin_dest_to_root = []
+            chemin_dest_to_root.append(dest)
+            while dest != root:
+                chemin_dest_to_root.append(parent[dest])
+                dest = parent[dest]
+
+            # On a désormais deux listes à fusionner
+            # On prend le 1er élément commun des deux listes pour faire la fusion
+            # Opération coûteuse
+
+            cond = False
+
+            for u in chemin:
+                for v in chemin_dest_to_root:
+                    if u == v:
+                        chemin = chemin[:chemin.index(u)+1]
+                        chemin_dest_to_root = chemin_dest_to_root[:chemin_dest_to_root.index(v)]
+                        chemin_dest_to_root.reverse()
+                        chemin.extend(chemin_dest_to_root)
+                        cond = True
+                        break
+                if cond == True:
+                    break
+
+            # mtn, on ne regarde que chemin (qui est mtn chemin_src_to_dest)             
+            
+            # On itère sur le chemin et on enregistre la puissance minimal requise
+
+            for sommet in chemin[:-1]:
+                for adjacent in self.graph[sommet]:
+                    if adjacent[0] == chemin[chemin.index(sommet)+1]:
+                    # si on tombe sur le sommet suivant du chemin
+                        if adjacent[1] > pwr:
+                        # on met à jour pwr
+                            pwr = adjacent[1]
+
+            liste_trajets.append(chemin)
+            liste_power.append(pwr)
+
+        return liste_trajets, liste_power
+
 def graph_from_file(filename):
     """
     Reads a text file and returns the graph as an object of the Graph class.
