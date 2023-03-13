@@ -752,11 +752,10 @@ class Graph:
             if ct == 1001:
                 return liste_trajets, liste_power
             
-            src = int(route[0])
-            dest = int(route[1])
+            src = route[0]
+            dest = route[1]
 
             chemin = []
-            chemin.append(dest)
 
             pwr = 0
 
@@ -764,7 +763,6 @@ class Graph:
 
             # On reconstitue les chemins jusqu'à la root pour src et dest:
 
-            chemin = []
             chemin.append(src)
             while src != root:
                 chemin.append(parent[src])
