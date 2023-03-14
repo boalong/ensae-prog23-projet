@@ -4,7 +4,7 @@ from graph import Graph, graph_from_file, kruskal
 
 
 data_path = "input/"
-file_no = "3"
+file_no = "4"
 
 g = graph_from_file(data_path + "network." + file_no + ".in")
 g.get_kruskal()
@@ -41,9 +41,13 @@ g.close()
 Pour network.1.in, on obtient:
 Temps d'exécution : 0.0006634000000000084
 
-Pour network.1.in, on obtient:
+Pour network.2.in, on obtient:
 Temps d'exécution : 5.1626027
 
+Pour network.3.in, on obtient:
+Temps d'exécution : 374.0334306
 
+Pour network.4.in, on obtient:
+Temps d'exécution : 645.491249
 
 '''

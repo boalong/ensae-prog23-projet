@@ -745,12 +745,13 @@ class Graph:
         liste_trajets = []
         liste_power = []
 
-        ct = 0
+        # ct = 0
         for route in liste_routes:
-            ct += 1
-            if ct == 1001:
+            # ct += 1
+            # if ct%10000 == 0:
+                # print(ct)
                 # return liste_trajets, liste_power
-                return liste_power
+                # return liste_power
             
             src = route[0]
             dest = route[1]
