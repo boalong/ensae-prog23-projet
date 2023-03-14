@@ -4,7 +4,7 @@ from graph import Graph, graph_from_file, kruskal
 
 
 data_path = "input/"
-file_no = "4"
+file_no = "1"
 
 g = graph_from_file(data_path + "network." + file_no + ".in")
 g.get_kruskal()
