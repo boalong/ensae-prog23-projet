@@ -738,7 +738,7 @@ class Graph:
         '''Pour obtenir une liste des min_power pour toutes le routes demandées'''
         # liste_routes est une liste de 3 éléments : le 1er est le départ, le 2ème est l'arrivée, le 3ème est l'utilité
 
-        self.get_kruskal()
+        # self.get_kruskal()
         parent = self.kruskal.DFS_parents(root)
 
         # On initialise l'output
@@ -748,9 +748,9 @@ class Graph:
         ct = 0
         for route in liste_routes:
             ct += 1
-            # print(ct)
             if ct == 1001:
-                return liste_trajets, liste_power
+                # return liste_trajets, liste_power
+                return liste_power
             
             src = route[0]
             dest = route[1]
@@ -791,23 +791,24 @@ class Graph:
                         break
                 if cond == True:
                     break
-
+            
             # mtn, on ne regarde que chemin (qui est mtn chemin_src_to_dest)             
             
             # On itère sur le chemin et on enregistre la puissance minimal requise
 
             for sommet in chemin[:-1]:
-                for adjacent in self.graph[sommet]:
+                for adjacent in self.kruskal.graph[sommet]:
                     if adjacent[0] == chemin[chemin.index(sommet)+1]:
                     # si on tombe sur le sommet suivant du chemin
                         if adjacent[1] > pwr:
                         # on met à jour pwr
                             pwr = adjacent[1]
 
-            liste_trajets.append(chemin)
+            # liste_trajets.append(chemin)
             liste_power.append(pwr)
 
-        return liste_trajets, liste_power
+        # return liste_trajets, liste_power
+        return liste_power
 
 def graph_from_file(filename):
     """
