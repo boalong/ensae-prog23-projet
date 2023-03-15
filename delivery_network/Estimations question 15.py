@@ -30,7 +30,7 @@ print("Estimation :" , (stop-start)*50)
 # il faut multiplier le temps par 50 (car on ne fait que les 10000 premiers trajets ici)
 
 '''
-Résultas:
+Résultats:
 
 Estimation : 486.5973200000001
 

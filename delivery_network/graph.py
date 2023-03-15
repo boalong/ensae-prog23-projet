@@ -100,6 +100,99 @@ class Graph:
         chemin.reverse()
 
         return chemin
+    
+    def shortest_path_with_power(self, src, dest, power): # Question 5 : algorithme de Dijkstra
+        '''
+        INPUT : 
+            - src : sommet de départ
+            - dest : sommet d'arrivée
+            - power : puissance maximale que l'on peut utiliser pour se déplacer
+        OUTPUT :
+            - chemin : liste des sommets du chemin le plus court entre src et dest avec la puissance power
+        '''
+
+        # Le début est le même que pour get_path_with_power_old
+
+        # On crée un nouveau graphe qui ne contient que les arêtes dont la puissance est inférieure à power
+
+        nv_graphe = Graph([])
+        nv_graphe = Graph([i for i in self.nodes])
+        for sommet, aretes in self.graph.items():
+            for arete in aretes:
+                if sommet < arete[0]:
+                    if arete[1] <= power:
+                        nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
+
+   
+        # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
+        # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
+        # il y a un chemin entre eux
+        # pour trouver un chemin quelconque, on fait un deep search à partir de l'un des deux et on remonte à partir
+        # second pour avoir un chemin
+
+        for ssgraphe in nv_graphe.connected_components():
+            if src in ssgraphe and dest not in ssgraphe:
+                return None
+            elif dest in ssgraphe and src not in ssgraphe:
+                return None
+
+        # On définit des fonctions intermédiaires pour l'algorithme de Dijkstra
+        
+        def poids_arc(s1,s2):
+            if s1>s2:
+                return poids_arc(s2,s1)
+            for sommet in self.graph[s1]:
+                if sommet[0] == s2:
+                    poids = sommet[2]
+            return poids
+    
+        def relacher(s1, s2, distance, predecesseur):
+            # s1 et s2 sont adjacents
+            if distance[s2] > distance[s1] + poids_arc(s1,s2):
+                distance[s2] = distance[s1] + poids_arc(s1,s2)
+                predecesseur[s2] = s1
+
+        def extraire_distance_min(liste):
+            d_min, ind_min = distance[liste[0]], 0 
+            for i in range(1,len(liste)):
+                if distance[liste[i]] < d_min:
+                    d_min, ind_min = distance[liste[i]], i
+            return ind_min
+        
+        def dijkstra(G):
+            E = []
+            F = nv_graphe.nodes
+            while F:
+                sommet = F.pop(extraire_distance_min(F))
+                E.append(sommet)
+                for adjacent in G[sommet]:
+                    adjacent = adjacent[0]
+                    relacher(sommet,adjacent,distance,predecesseur)
+            
+        def plus_court_chemin(G, depart, arrivee):
+            dijkstra(G)
+            point = arrivee
+            chemin = []
+            while point != depart:
+                chemin.append(point)
+                point = predecesseur[point]
+        
+            chemin.append(depart)
+            chemin.reverse()
+    
+            return chemin
+  
+        # Initialisation des distances et des prédécesseurs
+        distance = {}
+        predecesseur = {}
+        distance = {node : np.inf for node in nv_graphe.nodes}
+        predecesseur = {node : None for node in nv_graphe.nodes}
+        distance[src] = 0
+
+        try:
+            return plus_court_chemin(nv_graphe.graph, src, dest), distance[dest]
+        except:
+            return None
                                   
     def connected_components(self):
         '''
@@ -215,17 +308,16 @@ class Graph:
         OUTPUT:
             - liste_trajets: une liste de trajets'''
         # liste_routes est une liste de 3 éléments : le 1er est le départ, le 2ème est l'arrivée, le 3ème est l'utilité
-        self.get_kruskal()
         parent = self.kruskal.DFS_parents(root)
         # On initialise l'output
-        liste_trajets = []
+        # liste_trajets = []
         liste_power = []
-        ct = 0
+        # ct = 0
         for route in liste_routes:
-            ct += 1
+            # ct += 1
             # print(ct)
-            if ct == 1001:
-                return liste_trajets, liste_power
+            # if ct == 10001:
+                # return liste_trajets, liste_power
             src = route[0]
             dest = route[1]
             chemin = []
@@ -270,10 +362,11 @@ class Graph:
                         # on met à jour pwr
                             pwr = adjacent[1]
 
-            liste_trajets.append(chemin)
+            # liste_trajets.append(chemin)
             liste_power.append(pwr)
 
-        return liste_trajets, liste_power
+        # return liste_trajets, liste_power
+        return liste_power
     
 def graph_from_file(filename):
     '''Crée un objet de la classe Graph à partir d'un fichier texte
