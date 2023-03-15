@@ -35,28 +35,71 @@ class Graph:
     
     def get_path_with_power(self, src, dest, power):
         '''
-        This function returns a path between two nodes if the minimal power is below the power given in input
         INPUT:
-            - src: the source node
-            - dest: the destination node
-            - power: the maximum power allowed
+        src: int (sommet de départ)
+        dest: int (sommet d'arrivée)
+        power: float (puissance du camion)
         OUTPUT:
-            - path: the path between the two nodes if it exists
-            - None: if the path does not exist
-        '''
-        visited_node={node:False  for node in self.nodes} #Initialisation of a dictionary in order to follow  which nodes are already visited or not
-        def path_research(node,path): #Definition of a recursive function
-            if node == dest:
-                return path
-            for neighbour in self.graph[node]: # We visit all nodes connected to the initial node
-                neighbour,minp, dist = neighbour
-                if not visited_node[neighbour] and minp<=power: # If the connected node is unvisited and the minimal power of the edge is below power_min, we visit it and continue
-                    visited_node[neighbour] = True #We mark the connected node as visited
-                    result = path_research(neighbour, path+[neighbour]) #We add the connected node to the path and reuse path_research 
-                    if result is None:
-                        return result
+        chemin: list (liste des sommets du chemin)'''
+
+        # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
+        # DFS et reconstruire le chemin à partir des parents
+
+        def DFS_chemin(G,root,arrivee,visited):
+
+            # Create a stack for DFS
+            stack = []
+ 
+            # Push the current source node.
+            stack.append(root)
+ 
+            while (len(stack)):
+                # Pop a vertex from stack
+                s = stack.pop()
+ 
+                # Stack may contain same vertex twice. So
+                # we need to add the popped item to the list only
+                # if it is not visited.
+                if (not visited[s]):
+                    visited[s] = True
+ 
+                # Get all adjacent vertices of the popped vertex s
+                # If a adjacent has not been visited, then push it
+                # to the stack.
+                # On les visitera plus tard
+
+                # Ne pas faire une copie du graphe : seulement rajouter une condition
+                for node in G.graph[s]:
+                    if (node[1] <= power) and (not visited[node[0]]):
+                        stack.append(node[0])
+                        parent[node[0]] = s
+                        if node[0] == arrivee:
+                        # Dans ce cas, on peut arrêter le pgrm car on a tout ce qu'il faut pour avoir notre chemin
+                            return None
+
+        parent = {i: None for i in self.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
+        visited_nodes = {node: False for node in self.nodes}
+
+        DFS_chemin(self, src, dest, visited_nodes)
+
+        # Récupérer le chemin à partir du dict parent
+
+        # Si le sommet n'a pas été atteint par le parcours en profondeur
+        if parent[dest] == None:
             return None
-        return path_research(src,[src]) 
+
+        chemin = [dest]
+
+        # Si le sommet a été atteint
+        while parent[dest] != src:
+            chemin.append(parent[dest])
+            dest = parent[dest]      
+
+        chemin.append(src)
+
+        chemin.reverse()
+
+        return chemin
                                   
     def connected_components(self):
         '''
