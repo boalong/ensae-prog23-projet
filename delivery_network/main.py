@@ -2,59 +2,45 @@ from time import perf_counter
 from graph import Graph, graph_from_file
 
 
+## Question 10. 
+
 data_path = "input/"
-file_name = "network.10.in"
+file_no = "10.in"
 
-g = graph_from_file(data_path + file_name)
+g = graph_from_file(data_path + "network." + file_no)
 
-print(g.min_power_acm(1,4))
+liste_trajets = []
 
-'''
+with open(data_path + "routes." + file_no, 'r') as f:
+    n = int(f.readline())
+    for _ in range(n):
+        liste_trajets.append(list(map(float, f.readline().split())))
+
+print(liste_trajets[:5])
 start = perf_counter()
-# g.get_path_with_power(1,99999,6473280)
-g.min_power(1,99999)
+for trajet in liste_trajets[:10]:
+    g.min_power(trajet[0], trajet[1])
 stop = perf_counter()
-print(str(stop-start))
-# 3 fois plus rapide que get_path_with_power sur acm
-'''
-'''
-nv_g = g.arbre_couvrant_min()
-print(nv_g.nb_nodes,nv_g.nb_edges)
-print(len(nv_g.connected_components()))
-print(nv_g.connected_components()[1],len(nv_g.connected_components()[1]))
-'''
+print("Estimation :" , (stop-start)*50000/60) # on divise par 60 pour avoir les minutes
 
-print(g.get_path_with_power(55676, 62046,1000000))
+# il faut multiplier le temps par 500 (car on ne fait que les 1000 premiers trajets ici)
 
 '''
-start = perf_counter()
-# nv_g.get_path_with_power(1,99999,6473280)
-g.min_power_acm(1,99999)
-stop = perf_counter()
-print(str(stop-start))
+Résultats:
+Estimation : 50048.314666666665
+
+Commentaire : plus de 50000 minutes, soit 833 heures, soit 34 jours, ce qui est beaucoup trop long pour un ordinateur.
 '''
 
 
+## Question 15.
 
-'''
-start = perf_counter()
-print(g.min_power(1,4))
-stop = perf_counter()
-print(str(stop-start))
+# Pour la question 15, on a créé une fonction spéciale min_power_routes qui prend en entrée une liste de trajets et qui renvoie une des puissances minimales.
 
-# on perd du temps car on construit un acm
-start = perf_counter()
-print(g.min_power_acm(1,4))
-stop = perf_counter()
-print(str(stop-start))
-'''
+# Les résultats de la question 15 sont dans le fichier question 15.py.
 
 
-# nickel pour graph_from_file
-# connected_components : fonctionne bien pour routes.1, mais après il y a une erreur de recursion
 
-# print(g.connected_components())
-# RecursionError
 
 
 

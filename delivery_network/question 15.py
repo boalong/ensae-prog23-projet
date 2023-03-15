@@ -4,7 +4,7 @@ from graph import Graph, graph_from_file, kruskal
 
 
 data_path = "input/"
-file_no = "1"
+file_no = "4"
 
 g = graph_from_file(data_path + "network." + file_no + ".in")
 g.get_kruskal()
@@ -50,4 +50,9 @@ Temps d'exécution : 374.0334306
 Pour network.4.in, on obtient:
 Temps d'exécution : 645.491249
 
+
+Commentaire : 
+Les résultats sont stockés dans le fichier routes.1.out, routes.2.out, routes.3.out, routes.4.out.
+Nous n'avons pas exécuté le programme pour network.5.in jusqu'à network.10.in car il est trop long (nous estimons que 
+cela aurait pris autour de 10 minutes à chaque fois, selon les estimations obtenues dans le script Estimations question 15.py).
 '''

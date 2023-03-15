@@ -161,7 +161,16 @@ class Graph:
         return chemin
 
 
-    def get_path_with_power(self, src, dest, power):                       
+    def get_path_with_power(self, src, dest, power):
+        '''
+        INPUT:
+        src: int (sommet de départ)
+        dest: int (sommet d'arrivée)
+        power: float (puissance du camion)
+        OUTPUT:
+        chemin: list (liste des sommets du chemin)'''
+
+
         # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
         # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
         # il y a un chemin entre eux
@@ -235,8 +244,44 @@ class Graph:
 
         return chemin
         
+
+    def shortest_path_with_power(self, src, dest, power): # Question 5 : algorithme de Dijkstra
         '''
-        # Bonus : algorithme de Dijkstra
+        INPUT : 
+            - src : sommet de départ
+            - dest : sommet d'arrivée
+            - power : puissance maximale que l'on peut utiliser pour se déplacer
+        OUTPUT :
+            - chemin : liste des sommets du chemin le plus court entre src et dest avec la puissance power
+        '''
+
+        # Le début est le même que pour get_path_with_power_old
+
+        # On crée un nouveau graphe qui ne contient que les arêtes dont la puissance est inférieure à power
+
+        nv_graphe = Graph([])
+        nv_graphe = Graph([i for i in self.nodes])
+        for sommet, aretes in self.graph.items():
+            for arete in aretes:
+                if sommet < arete[0]:
+                    if arete[1] <= power:
+                        nv_graphe.add_edge(sommet, arete[0], arete[1], arete[2])
+
+   
+        # mtn on regarde s'il y a un chemin entre les deux sommets dans nv_graphe
+        # pour ça, on regarde les sommets connexes de nv_graphe : si les deux sommets sont connexes, alors
+        # il y a un chemin entre eux
+        # pour trouver un chemin quelconque, on fait un deep search à partir de l'un des deux et on remonte à partir
+        # second pour avoir un chemin
+
+        for ssgraphe in nv_graphe.connected_components():
+            if src in ssgraphe and dest not in ssgraphe:
+                return None
+            elif dest in ssgraphe and src not in ssgraphe:
+                return None
+
+        # On définit des fonctions intermédiaires pour l'algorithme de Dijkstra
+        
         def poids_arc(s1,s2):
             if s1>s2:
                 return poids_arc(s2,s1)
@@ -258,9 +303,9 @@ class Graph:
                     d_min, ind_min = distance[liste[i]], i
             return ind_min
         
-        def dijkstra(G, racine):
+        def dijkstra(G):
             E = []
-            F = self.nodes
+            F = nv_graphe.nodes
             while F:
                 sommet = F.pop(extraire_distance_min(F))
                 E.append(sommet)
@@ -269,7 +314,7 @@ class Graph:
                     relacher(sommet,adjacent,distance,predecesseur)
             
         def plus_court_chemin(G, depart, arrivee):
-            dijkstra(G, depart)
+            dijkstra(G)
             point = arrivee
             chemin = []
             while point != depart:
@@ -281,19 +326,25 @@ class Graph:
     
             return chemin
   
-        # Initialisation
-        distance = {node : np.inf for node in self.nodes}
-        predecesseur = {node : None for node in self.nodes}
+        # Initialisation des distances et des prédécesseurs
+        distance = {}
+        predecesseur = {}
+        distance = {node : np.inf for node in nv_graphe.nodes}
+        predecesseur = {node : None for node in nv_graphe.nodes}
         distance[src] = 0
 
         try:
             return plus_court_chemin(nv_graphe.graph, src, dest), distance[dest]
         except:
             return None
-        '''
-    
-    
+
+     
     def connected_components(self):
+        '''
+        OUTPUT : 
+            - list_components : liste des composantes connexes du graphe
+        '''
+
         list_components = []
 
         def DFS(root,visited):
