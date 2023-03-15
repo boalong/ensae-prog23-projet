@@ -1,27 +1,10 @@
-'''
 from time import perf_counter
 import numpy as np
 from graph import Graph, graph_from_file, kruskal
 
 
 data_path = "input/"
-file_no = "00.in"
-
-g = graph_from_file(data_path + "network." + file_no)
-
-g.get_kruskal()
-
-print(g.min_power_routes([[1,3,1],[1,10,1],[9,6,1],[7,4,1],[4,10,1],[8,1,1]]))
-'''
-
-
-from time import perf_counter
-import numpy as np
-from graph import Graph, graph_from_file, kruskal
-
-
-data_path = "input/"
-file_no = "3.in"
+file_no = "10.in"
 
 g = graph_from_file(data_path + "network." + file_no)
 
@@ -41,18 +24,14 @@ g.get_kruskal()
 start = perf_counter()
 resultats = g.min_power_routes(liste_trajets, 1)
 stop = perf_counter()
-print("Estimation :" , (stop-start)*500)
+print("Estimation :" , (stop-start)*50)
 
 
-# il faut multiplier le temps par 500 (car on ne fait que les 1000 premiers trajets ici)
+# il faut multiplier le temps par 50 (car on ne fait que les 10000 premiers trajets ici)
 
 '''
 Résultas:
 
-Estimation : 1427.30895
-
-Estimation : 669.4114500000002 (en enlevant le get_kruskal())
-
-Estimation : 545.0991000000002 (en corrigeant une erreur de code)
+Estimation : 486.5973200000001
 
 '''

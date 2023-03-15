@@ -34,16 +34,6 @@ class Graph:
         self.nb_edges += 1
     
     def get_path_with_power(self, src, dest, power):
-        '''
-        This function returns a path between two nodes if the minimal power is below the power given in input
-        INPUT:
-            - src: the source node
-            - dest: the destination node
-            - power: the maximum power allowed
-        OUTPUT:
-            - path: the path between the two nodes if it exists
-            - None: if the path does not exist
-        '''
         visited_node={node:False  for node in self.nodes} #Initialisation of a dictionary in order to follow  which nodes are already visited or not
         def path_research(node,path): #Definition of a recursive function
             if node == dest:
@@ -59,11 +49,6 @@ class Graph:
         return path_research(src,[src]) 
                                   
     def connected_components(self):
-        '''
-        This function returns a list of all the connected components of the graph
-        OUTPUT:
-            - list_components: a list of all the connected components of the graph
-        '''
         list_components = [] #Initialisation of the component list
         visited_nodes = {node:False for node in self.nodes} #Initialisation of a dictionnary in order to follow  which nodes are already visited or not
         for i in self.graph.keys(): #We visit all the nodes and add an empty list to component_list for every unvisited nodes 
@@ -84,23 +69,9 @@ class Graph:
         return list_components
     
     def connected_components_set(self):
-        '''
-        This function returns a set of all the connected components of the graph
-        OUTPUT:
-            - set_components: a set of all the connected components of the graph
-        '''
         return set(map(frozenset, self.connected_components()))
     
     def min_power(self, src, dest):
-        '''
-        This function returns the minimum power needed to go from src to dest
-        INPUT:
-            - src: the source node
-            - dest: the destination node
-        OUTPUT:
-            - path: the path between the two nodes if it exists
-            - p_min: the minimum power needed to go from src to dest
-        '''
         power_list=[] #Initialisation of a list with the power of all edges of the graph
         for node in self.nodes:
             for neighbour in self.graph[node]:
@@ -127,11 +98,7 @@ class Graph:
 
 #Séance 2
     def DFS_parents(self, root=1):
-        '''On fait un seul parcours en profondeur pour récupérer tous les liens de parenté à partir du sommet root
-        INPUT:
-            - root: le sommet de départ
-        OUTPUT:
-            - parent: un dictionnaire avec le sommet précédent à chaque fois'''
+        '''On fait un seul parcours en profondeur pour récupérer tous les liens de parenté à partir du sommet root'''
         # Initialisation
         parent = {i: None for i in self.nodes} # il faut créer un dictionnaire avec le sommet précédent à chaque fois              
         visited = {i: False for i in self.nodes}
@@ -161,16 +128,10 @@ class Graph:
         return parent
  
     def get_kruskal(self):
-        '''On récupère l'arbre couvrant de poids minimum'''
         self.kruskal = kruskal(self) 
     
     def min_power_routes(self, liste_routes, root=1):
-        '''Pour obtenir une liste des min_power pour toutes le routes demandées
-        INPUT:
-            - liste_routes: une liste de routes
-            - root: le sommet de départ du DFS
-        OUTPUT:
-            - liste_trajets: une liste de trajets'''
+        '''Pour obtenir une liste des min_power pour toutes le routes demandées'''
         # liste_routes est une liste de 3 éléments : le 1er est le départ, le 2ème est l'arrivée, le 3ème est l'utilité
         self.get_kruskal()
         parent = self.kruskal.DFS_parents(root)
@@ -233,11 +194,6 @@ class Graph:
         return liste_trajets, liste_power
     
 def graph_from_file(filename):
-    '''Crée un objet de la classe Graph à partir d'un fichier texte
-    INPUT:
-        - filename: le nom du fichier
-    OUTPUT:
-        - g: un objet de la classe Graph'''
     with open(filename, "r") as file:
         n, m = map(int, file.readline().split())
         g = Graph([i for i in range(1, n+1)])
@@ -253,12 +209,7 @@ def graph_from_file(filename):
                 raise Exception("Format incorrect")
     return g
 
-def kruskal(G):
-    '''Algorithme de Kruskal
-    INPUT:
-        - G: un objet de la classe Graph
-    OUTPUT:
-        - X: un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
+def kruskal(G): # G est un objet de la class Graph
 
 #Définition des fonctions utiles
     def find(s):
