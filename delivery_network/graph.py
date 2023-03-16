@@ -503,5 +503,5 @@ def is_list_trucks_buyable(list_trucks, trucks):
             # print(truck)
             # print(trucks[truck])
             cost += trucks[truck][1]
-    return B
+    return B - cost
 
