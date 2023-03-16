@@ -455,3 +455,13 @@ def kruskal(G):
 
     return arbre_brut
 
+
+def trucks_from_file(filename):
+    with open(filename, "r") as file:
+        n = int(file.readline()) # n est le nombre de modèles de camions
+        trucks = {i: () for i in range(1,n+1)}
+        for i in range(1,n+1):
+            char_trucks = tuple(map(int, file.readline().split()))
+            trucks[i] = char_trucks
+    return trucks
+
