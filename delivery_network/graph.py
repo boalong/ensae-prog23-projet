@@ -484,10 +484,24 @@ def trucks_for_routes(filename, trucks):
             list_trucks.append(1)
             continue
         power_min = int(line[:-3])
-        print(power_min)
+        # print(power_min)
         for truck, char_trucks in trucks.items(): # on itère dans l'ordre croissant des puissances des camions
-            if char_trucks[1] >= power_min:
+            if char_trucks[0] >= power_min:
+                # print(truck)
                 list_trucks.append(truck)
                 break
+            elif truck == len(trucks): # s'il s'agit du camion le plus puissant
+                list_trucks.append(0)
     return list_trucks
+
+
+def is_list_trucks_buyable(list_trucks, trucks):
+    B = 25*10**9
+    cost = 0
+    for truck in list_trucks:
+        if truck != 0: # le trajet peut être effectué
+            # print(truck)
+            # print(trucks[truck])
+            cost += trucks[truck][1]
+    return B
 
