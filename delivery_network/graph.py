@@ -455,6 +455,7 @@ def kruskal(G):
 
     return arbre_brut
 
+# Séance 4
 
 def trucks_from_file(filename):
     with open(filename, "r") as file:
@@ -464,4 +465,29 @@ def trucks_from_file(filename):
             char_trucks = tuple(map(int, file.readline().split()))
             trucks[i] = char_trucks
     return trucks
+
+
+# On va calculer min_power_routes pour chaque camion
+
+# On prend par défaut le camion le moins coûteux et on regarde s'il passe.
+# S'il ne passe pas, on prend le camion suivant
+
+# Il faut utiliser les fichiers routes.x.out
+
+def trucks_for_routes(filename, trucks):
+    # les fichiers routes.x.out affichent pour chaque ligne la puissance minimale requise pour le trajet
+    # on lit progressivement les lignes du fichier routes.x.out
+    f = open(filename, "r")
+    list_trucks = []
+    for line in f:
+        if line == "0\n":
+            list_trucks.append(1)
+            continue
+        power_min = int(line[:-3])
+        print(power_min)
+        for truck, char_trucks in trucks.items(): # on itère dans l'ordre croissant des puissances des camions
+            if char_trucks[0] >= power_min:
+                list_trucks.append(truck)
+                break
+    return list_trucks
 
