@@ -486,7 +486,7 @@ def trucks_for_routes(filename, trucks):
         power_min = int(line[:-3])
         print(power_min)
         for truck, char_trucks in trucks.items(): # on itère dans l'ordre croissant des puissances des camions
-            if char_trucks[0] >= power_min:
+            if char_trucks[1] >= power_min:
                 list_trucks.append(truck)
                 break
     return list_trucks
