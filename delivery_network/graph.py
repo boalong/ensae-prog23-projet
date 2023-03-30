@@ -469,6 +469,27 @@ def trucks_from_file(filename):
     return trucks
 
 
+def active_trucks(trucks):
+    # On crée une liste des camions actifs
+    active_trucks = {}
+    # les camions sont par ordre croissant de puissance
+    ct_cost = 0
+    for i in trucks.keys():
+        if trucks[i][1] > ct_cost:
+            active_trucks[i] = trucks[i]
+            ct_cost = trucks[i][1]
+    
+    return active_trucks
+
+
+def active_trucks_from_file(filename):
+    # On lit le fichier et on crée un dictionnaire de camions actifs, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
+    trucks = trucks_from_file(filename)
+    ac_trucks = active_trucks(trucks)
+    
+    return ac_trucks
+
+
 def list_routes_from_file(filename):
     # On lit le fichier et on crée une liste de trajets, avec comme élément une liste de caractéristiques (départ, arrivée, utilité)
     with open(filename, 'r') as f:
@@ -481,7 +502,6 @@ def list_routes_from_file(filename):
             # liste_trajets.append(list(map(float, f.readline().split())))
     
     return liste_trajets
-
 
 # On va calculer min_power_routes pour chaque camion
 
@@ -533,7 +553,7 @@ def routes_and_trucks_with_max_utility(filename_in_trucks, filename_in_routes, f
     # On suppose que l'on a déjà trucks
     # On prend les routes dans l'ordre jusqu'à ce que le budget soit dépassé
 
-    trucks = trucks_from_file(filename_in_trucks)
+    trucks = active_trucks_from_file(filename_in_trucks)
 
     list_trucks_for_routes = trucks_for_routes(filename_out, trucks)
 
@@ -571,9 +591,9 @@ def ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out):
 
     liste_ratio = []
 
-    list_trucks = trucks_from_file(filename_in_trucks)
+    list_trucks = active_trucks_from_file(filename_in_trucks)
     list_routes = list_routes_from_file(filename_in_routes)
-    list_trucks_for_routes = trucks_for_routes(filename_out, trucks_from_file(filename_in_trucks))
+    list_trucks_for_routes = trucks_for_routes(filename_out, active_trucks_from_file(filename_in_trucks))
 
     for i in range(len(list_routes)):
         if list_trucks_for_routes[i] != 0:
@@ -582,10 +602,11 @@ def ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out):
     # liste_camions est la liste parallèle à liste_ratio, avec pour chaque trajet le camion le moins coûteux qui passe
     liste_camions = []
 
-    for i in range(len(liste_ratio)):
-        liste_camions.append(list_trucks_for_routes[liste_ratio[i][1]])
-
     liste_ratio.sort(reverse=True)
+    
+    for i in range(len(liste_ratio)):
+        # avec l'indice du trajet on va récupérer le numéro du camion avec list_trucks_for_routes[ind_trajet]
+        liste_camions.append(list_trucks_for_routes[liste_ratio[i][1]]) # on a une liste de camions
 
     return liste_ratio, liste_camions
 
@@ -607,7 +628,7 @@ def is_list_trucks_buyable_ratio(list_trucks_for_routes, trucks):
 def max_utility_from_ratio(filename_in_trucks, filename_in_routes, filename_out):
     # On prend les trajets dans l'ordre décroissant du ratio utilité/cout
 
-    trucks = trucks_from_file(filename_in_trucks)
+    trucks = active_trucks_from_file(filename_in_trucks)
     
     liste_ratio, liste_camions = ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out)
 
@@ -641,5 +662,4 @@ def max_utility_from_ratio(filename_in_trucks, filename_in_routes, filename_out)
 
 
     # On les ajoute progressivement jusqu'à ce que le budget soit dépassé
-
 
