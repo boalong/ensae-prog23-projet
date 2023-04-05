@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import combinations
 
 class Graph:
     def __init__(self, nodes=[]):
@@ -625,7 +626,7 @@ def is_list_trucks_buyable_ratio(list_trucks_for_routes, trucks):
     return False
 
 
-def max_utility_from_ratio(filename_in_trucks, filename_in_routes, filename_out):
+def max_utility_from_ratio_glouton(filename_in_trucks, filename_in_routes, filename_out):
     # On prend les trajets dans l'ordre décroissant du ratio utilité/cout
 
     trucks = active_trucks_from_file(filename_in_trucks)
@@ -661,5 +662,39 @@ def max_utility_from_ratio(filename_in_trucks, filename_in_routes, filename_out)
     return len(list_routes_max), len(list_routes_done), utility
 
 
-    # On les ajoute progressivement jusqu'à ce que le budget soit dépassé
+def algorithme_naif(filename_in_trucks, filename_in_routes, filename_out):
+
+    trucks = active_trucks_from_file(filename_in_trucks)
+    routes = list_routes_from_file(filename_in_routes)
+    list_trucks_for_routes = trucks_for_routes(filename_out, active_trucks_from_file(filename_in_trucks))
+
+    # On regarde pour chaque combinaisons de trajets si le budget est suffisant
+    # Si oui, on calcule l'utilité totale de la combinaison
+    # On met à jour la combinaison avec l'utilité maximale
+
+    # On crée une liste avec les numéros des trajets
+
+    liste_no_routes = [i for i in range(1, len(routes)+1)]
+
+    max_utility = 0
+    best_comb = []
+
+    for i in range(1, len(routes)+1):
+        for comb in combinations(liste_no_routes, i):
+            print(comb) # afficher les combinaisons pour suivre la progression de l'algorithme
+            # Il faut calculer la liste des camions pour chaque trajet
+            current_trucks_for_routes = []
+            for route in comb:
+                current_trucks_for_routes.append(list_trucks_for_routes[route-1])
+            if is_list_trucks_buyable(current_trucks_for_routes, trucks):
+                utility = 0
+                for route in comb:
+                    utility += routes[route-1][2]
+                if utility > max_utility:
+                    max_utility = utility
+                    best_comb = comb
+
+    return len(best_comb), max_utility
+    # Cet algorithme n'est pas raisonnable: il faut trouver une autre méthode pour calculer toutes les combinaisons
+
 
