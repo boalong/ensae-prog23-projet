@@ -1,5 +1,6 @@
 import numpy as np
 from itertools import combinations
+from random import random
 
 class Graph:
     def __init__(self, nodes=[]):
@@ -786,3 +787,183 @@ def algorithme_naif(filename_in_trucks, filename_in_routes, filename_out):
     # Cet algorithme n'est pas raisonnable: il faut trouver une autre méthode pour calculer toutes les combinaisons
 
 
+# Question 20
+
+# On récupère l'arbre de poids minimum, et on supprime les arêtes avec une probabilité epsilon
+
+def makeset(s, parent, rang):
+    parent[s] = s
+    rang[s] = 0
+
+def sort_by_weight(list_edges):
+    return list_edges.sort(key = lambda x: x[2])
+
+def find(s, parent, rang):
+    while s != parent[s] :
+        s = parent[s]
+    return s
+
+def union(x,y, parent, rang):
+    r_x = find(x, parent, rang)
+    r_y = find(y, parent, rang)
+
+    # Si x et y sont déjà dans le même set
+    if r_x == r_y:
+        return None
+    if rang[r_x] > rang[r_y]:
+        parent[r_y] = r_x
+    else:
+        parent[r_x] = r_y
+        if rang[r_x] == rang[r_y]: 
+            rang[r_y] = rang[r_y] + 1  
+
+def kruskal_int(graphe, parent, rang):
+# Input: A connected undirected graph G = (V, E)
+# Il faut faire kruskal sur chaque composante connexe
+# Output: A minimum spanning tree defined by the edges X
+    for sommet in graphe.keys():
+    # for sommet in self.nodes:
+        makeset(sommet, parent, rang)
+
+    # X est un graphe vide
+    X = Graph([])
+
+    # Créer une liste avec les noeuds et leur poids
+    liste_aretes = []
+    for sommet, arrivee in graphe.items():
+        for element in arrivee:
+            # On évite de mettre deux fois la même arête
+            if sommet < element[0]:
+                liste_aretes.append([sommet, element[0], element[1], element[2]])
+    
+    # Sort the edges E by weight    
+    sort_by_weight(liste_aretes)
+            
+    for arete in liste_aretes:
+        if find(arete[0], parent, rang) != find(arete[1], parent, rang):
+            X.add_edge(arete[0],arete[1],arete[2],arete[3])
+            union(arete[0], arete[1], parent, rang)
+    
+    return X
+
+
+def kruskal_epsilon(G, epsilon):
+    '''Algorithme de Kruskal
+    INPUT:
+        - G: un objet de la classe Graph
+    OUTPUT:
+        - X: un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
+    # Initialisation
+    parent = {}
+    rang = {}
+
+    arbre_couvrant = kruskal_int(G.graph, parent, rang)
+    Y = Graph([i for i in G.nodes]) # Graphe vide
+
+    # On supprime les arêtes avec une probabilité epsilon
+    for sommet, aretes in arbre_couvrant.graph.items():
+        # print("Sommet:", sommet)
+        # sommet est une liste de noeuds
+        for i, arete in enumerate(aretes):
+            # on fait attention à ne pas passer deux fois sur la même arête
+            if sommet < arete[0]:
+                # print("Arete:", arete)
+                # tirage = random()
+                # print("Tirage:", tirage)
+                if random() >= epsilon:
+                    # print("On conserve l'arête") # C'est plus simple de créer un nouveau graphe car on n'a pas de méthode remove_edge
+                    Y.add_edge(sommet, arete[0], arete[1], arete[2])
+    
+    return Y
+
+
+# Maintenant qu'on a l'arbre couvrant de poids minimum, on peut calculer toutes les fonction précédentes
+
+
+# Pour calculer l'espérance d'utilité d'un trajet, il faut calculer la probabilité qu'il ne puisse plus être accessible
+# C'est-à-dire qu'une arête se soit cassée dessus
+
+# Il faut d'abord calculer le nombre d'arêtes qu'il faut parcourir pour qu'un trajet soit effectué
+
+def nb_aretes_entre_deux_sommets_kruskal(graphe, src, dest, root=1):
+
+    parent = graphe.DFS_parents(root)
+
+    chemin = []
+
+    # Procédure pour reconstituer le trajet si src est différent de la root du DFS
+
+    # On reconstitue les chemins jusqu'à la root pour src et dest:
+
+    chemin.append(src)
+    while src != root:
+        chemin.append(parent[src])
+        src = parent[src]
+
+    chemin_dest_to_root = []
+    chemin_dest_to_root.append(dest)
+    while dest != root:
+        chemin_dest_to_root.append(parent[dest])
+        dest = parent[dest]
+
+    # On a désormais deux listes à fusionner
+    # On prend le 1er élément commun des deux listes pour faire la fusion
+    cond = False
+    for u in chemin:
+        for v in chemin_dest_to_root:
+            if u == v:
+                chemin = chemin[:chemin.index(u)+1]
+                chemin_dest_to_root = chemin_dest_to_root[:chemin_dest_to_root.index(v)]
+                chemin_dest_to_root.reverse()
+                chemin.extend(chemin_dest_to_root)
+                cond = True
+                break
+        if cond == True:
+            break
+    
+    print(chemin)
+    return len(chemin)-1
+
+
+# La probabilité de pouvoir emprunter le trajet est (1-epsilon)^nb_arêtes
+# Probabilité qu'aucune arête ne se casse sur le trajet
+
+def proba_trajet_kruskal(graphe, src, dest, epsilon, root=1):
+    nb_aretes = nb_aretes_entre_deux_sommets_kruskal(graphe, src, dest, root)
+    return (1-epsilon)**nb_aretes
+
+# L'utilité espérée est le produit de cette probabilité par l'utilité du trajet
+
+def utilite_esperee(proba, utilite):
+    return proba*utilite
+
+# On crée un fichier avec pour chaque trajet l'utilité espérée
+# Il faut ouvrir le fichier routes.x.in pour avoir les trajets et les utilités
+def utilite_esperee_trajets(file_no, epsilon):
+
+    g = graph_from_file("input/network." + file_no + ".in")
+    g_kruskal = kruskal(g)
+
+    # Calculer les min_power de toutes les routes
+    # pour optimiser le process, il faut stocker une liste min power pour tout le graphe
+    # on va associer une méthode liste power pour calculer une fois pour toute
+
+    liste_trajets = []
+
+    # On crée une liste de trajets avec depart, arrivee, utilité espérée
+    with open("input/routes." + file_no + ".in", 'r') as f:
+        n = int(f.readline())
+        for _ in range(n):
+            depart, arrivee, utilite = f.readline().split()
+            depart, arrivee, utilite = int(depart), int(arrivee), float(utilite)
+            utilite_esp = utilite_esperee(proba_trajet_kruskal(g_kruskal, depart, arrivee, epsilon), utilite)
+            liste_trajets.append([depart, arrivee, utilite_esp])
+
+    resultats = g.min_power_routes(liste_trajets, 1)
+
+    print(resultats[:10])
+
+    g = open("output/routes_esp." + file_no + ".out", "w")
+    for min_power in resultats:
+        g.write(str(min_power) + "\n")
+    g.close()
