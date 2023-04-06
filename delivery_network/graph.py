@@ -424,7 +424,7 @@ class Graph:
             # ct += 1
             # print(ct)
             # if ct == 10001:
-                # return liste_trajets, liste_power
+                # return liste_power
             src = route[0]
             dest = route[1]
             chemin = []
