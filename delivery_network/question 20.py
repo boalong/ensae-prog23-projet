@@ -10,3 +10,6 @@ print(G_kruskal)
 # print(nb_aretes_entre_deux_sommets_kruskal(G_kruskal, 2, 10))
 print(proba_trajet_kruskal(G_kruskal, 2, 10, 0.5)) # 0.5 = epsilon
 print(proba_trajet_kruskal(G_kruskal, 2, 10, 0.99)) # 0.99 = epsilon
+
+utilite_esperee_trajets("1", 0)
+utilite_esperee_trajets("1", 0.5)

@@ -921,7 +921,7 @@ def nb_aretes_entre_deux_sommets_kruskal(graphe, src, dest, root=1):
         if cond == True:
             break
     
-    print(chemin)
+    # print(chemin)
     return len(chemin)-1
 
 
@@ -959,9 +959,12 @@ def utilite_esperee_trajets(file_no, epsilon):
             utilite_esp = utilite_esperee(proba_trajet_kruskal(g_kruskal, depart, arrivee, epsilon), utilite)
             liste_trajets.append([depart, arrivee, utilite_esp])
 
+    print(liste_trajets[:10])
+
+    g.get_kruskal()
     resultats = g.min_power_routes(liste_trajets, 1)
 
-    print(resultats[:10])
+    # print(resultats[:10])
 
     g = open("output/routes_esp." + file_no + ".out", "w")
     for min_power in resultats:
