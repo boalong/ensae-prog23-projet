@@ -456,7 +456,7 @@ def kruskal(G):
 
     return arbre_brut
 
-# Séance 4
+# Séances 4 et 5
 
 def trucks_from_file(filename):
     # On lit le fichier et on crée un dictionnaire de camions, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
@@ -575,6 +575,7 @@ def routes_and_trucks_with_max_utility(filename_in_trucks, filename_in_routes, f
     # filename est le nom du fichier routes.x.in
     # On suppose que l'on a déjà trucks
     # On prend les routes dans l'ordre jusqu'à ce que le budget soit dépassé
+    # Cela donne un 1er résultat que l'on pourra comparer avec les résultats de l'algorithme knapsack
 
     trucks = active_trucks_from_file(filename_in_trucks)
 
@@ -606,7 +607,7 @@ def routes_and_trucks_with_max_utility(filename_in_trucks, filename_in_routes, f
             active_index += 1
 
     return len(list_routes_max), len(list_routes_done), utility # le nombre de trajets effectués, l'utilité
-        
+     
 
 
 def ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out):
@@ -616,7 +617,7 @@ def ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out):
 
     list_trucks = active_trucks_from_file(filename_in_trucks)
     list_routes = list_routes_from_file(filename_in_routes)
-    list_trucks_for_routes = trucks_for_routes(filename_out, active_trucks_from_file(filename_in_trucks))
+    list_trucks_for_routes = trucks_for_routes(filename_out, list_trucks)
 
     for i in range(len(list_routes)):
         if list_trucks_for_routes[i] != 0:
@@ -660,7 +661,11 @@ def max_utility_from_ratio_glouton(filename_in_trucks, filename_in_routes, filen
     while is_list_trucks_buyable_ratio(list_routes_max, trucks):
         # print(is_list_trucks_buyable(list_routes_max, trucks))
         i+=1
+        if i%1000 == 0:
+            print(i)
         list_routes_max = liste_camions[:i] # on prend les i trajets les plus rentables
+
+    list_routes_max.pop()
 
     # Afficher les routes, afficher l'utilité totale
     list_routes = list_routes_from_file(filename_in_routes)
@@ -682,6 +687,67 @@ def max_utility_from_ratio_glouton(filename_in_trucks, filename_in_routes, filen
             active_index += 1
 
     return len(list_routes_max), len(list_routes_done), utility
+
+
+
+def improved_glouton(filename_in_trucks, filename_in_routes, filename_out):
+    # On prend les trajets dans l'ordre décroissant du ratio utilité/cout
+
+    trucks = active_trucks_from_file(filename_in_trucks)
+    
+    liste_ratio, liste_camions = ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out)
+    # liste_ratio est une liste de tuples (ratio, indice du trajet)
+    # liste_camions est une liste de camions, avec pour chaque trajet le camion le moins coûteux qui passe
+
+    i=1
+    list_routes_max = liste_camions[:i]
+    # list_routes_max est la liste des numéros de camions qui effectuent les trajets les plus rentables
+    while is_list_trucks_buyable_ratio(list_routes_max, trucks):
+        # print(is_list_trucks_buyable(list_routes_max, trucks))
+        i+=1
+        if i%1000 == 0:
+            print(i)
+        list_routes_max = liste_camions[:i] # on prend les i trajets les plus rentables
+
+    list_routes_max.pop()
+
+    cout_actuel = 0
+    for i in range(len(list_routes_max)):
+        cout_actuel += trucks[list_routes_max[i]][1]
+
+    # Il nous faut le budget restant
+    budget_restant = 25*10**9 - cout_actuel
+
+    list_routes_max_temp = list_routes_max[:]
+    # On va jusqu'au bout de la list_routes_max pour voir si on peut ajouter des trajets
+    for j in liste_camions[i:]:
+        if trucks[j][1] <= budget_restant: # on peut ajouter le trajet
+            list_routes_max_temp.append(j)
+            budget_restant -= trucks[j][1]
+
+    list_routes_max = list_routes_max_temp[:]
+
+    # Afficher les routes, afficher l'utilité totale
+    list_routes = list_routes_from_file(filename_in_routes)
+    list_routes_done = []
+
+    utility = 0
+
+    for i in range(len(list_routes_max)): # i est l'indice du camion le plus économique pour chaque trajet
+        if list_routes_max[i] != 0:
+            ind_route = liste_ratio[i][1]
+            list_routes_done.append((list_routes[ind_route][0], list_routes[ind_route][1]))
+            utility += list_routes[ind_route][2]
+
+    active_index = 0
+    for i in range(len(list_routes_max)):
+        if list_routes_max[active_index] == 0:
+            list_routes_max.pop(active_index)
+        else:
+            active_index += 1
+
+    return len(list_routes_max), len(list_routes_done), utility
+
 
 
 def algorithme_naif(filename_in_trucks, filename_in_routes, filename_out):
