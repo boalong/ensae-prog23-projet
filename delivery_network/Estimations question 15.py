@@ -32,6 +32,22 @@ print("Estimation :" , (stop-start)*50)
 '''
 Résultats:
 
+Fichier 5.in
+Estimation : 439.41824499999996
+
+Fichier 6.in
+Estimation : 658.706935
+
+Fichier 7.in
+Estimation : 560.300265
+
+Fichier 8.in
+Estimation : 406.50344
+
+Fichier 9.in
+Estimation : 401.433475
+
+Fichier 10.in
 Estimation : 486.5973200000001
 
 '''
