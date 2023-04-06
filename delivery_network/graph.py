@@ -3,13 +3,39 @@ from itertools import combinations
 from random import random
 
 class Graph:
+    """
+    A class representing graphs as adjacency lists and implementing various algorithms on the graphs. Graphs in the class are not oriented. 
+    Attributes: 
+    -----------
+    nodes: NodeType
+        A list of nodes. Nodes can be of any immutable type, e.g., integer, float, or string.
+        We will usually use a list of integers 1, ..., n.
+    graph: dict
+        A dictionnary that contains the adjacency list of each node in the form
+        graph[node] = [(neighbor1, p1, d1), (neighbor1, p1, d1), ...]
+        where p1 is the minimal power on the edge (node, neighbor1) and d1 is the distance on the edge
+    nb_nodes: int
+        The number of nodes.
+    nb_edges: int
+        The number of edges. 
+    """
+
     def __init__(self, nodes=[]):
+        """
+        Initializes the graph with a set of nodes, and no edges. 
+        Parameters: 
+        -----------
+        nodes: list, optional
+            A list of nodes. Default is empty.
+        """
         self.nodes = nodes
         self.graph = dict([(n, []) for n in nodes])
         self.nb_nodes = len(nodes)
         self.nb_edges = 0
     
+
     def __str__(self):
+        """Prints the graph as a list of neighbors for each node (one per line)"""
         if not self.graph:
             output = "The graph is empty"            
         else:
@@ -17,9 +43,24 @@ class Graph:
             for source, destination in self.graph.items():
                 output += f"{source}-->{destination}\n"
         return output
+    
+# Séance 1
 
-#Séance 1    
     def add_edge(self, node1, node2, power_min, dist=1):
+        """
+        Adds an edge to the graph. Graphs are not oriented, hence an edge is added to the adjacency list of both end nodes. 
+
+        Parameters: 
+        -----------
+        node1: NodeType
+            First end (node) of the edge
+        node2: NodeType
+            Second end (node) of the edge
+        power_min: numeric (int or float)
+            Minimum power on this edge
+        dist: numeric (int or float), optional
+            Distance between node1 and node2 on the edge. Default is 1.
+        """
         node1 = int(node1)
         node2 = int(node2)
         if node1 not in self.graph:
@@ -34,15 +75,15 @@ class Graph:
         self.graph[node1].append((node2, power_min, dist))
         self.graph[node2].append((node1, power_min, dist))
         self.nb_edges += 1
-    
+
     def get_path_with_power(self, src, dest, power):
         '''
-        INPUT:
-        src: int (sommet de départ)
-        dest: int (sommet d'arrivée)
-        power: float (puissance du camion)
-        OUTPUT:
-        chemin: list (liste des sommets du chemin)'''
+        INPUT :
+            - src: int (sommet de départ)
+            - dest: int (sommet d'arrivée)
+            - power: float (puissance du camion)
+        OUTPUT :
+            - chemin: list (liste des sommets du chemin)'''
 
         # Faire un DFS à partir du sommet de départ. Dès qu'on tombe sur le sommet d'arrivée, arrêter le
         # DFS et reconstruire le chemin à partir des parents
@@ -103,7 +144,8 @@ class Graph:
 
         return chemin
     
-    def shortest_path_with_power(self, src, dest, power): # Question 5 : algorithme de Dijkstra
+    # Question 5 : algorithme de Dijkstra
+    def dijkstra_shortest_path_with_power(self, src, dest, power):
         '''
         INPUT : 
             - src : sommet de départ
@@ -262,8 +304,67 @@ class Graph:
         path=self.get_path_with_power(src, dest, p)
         p_min=p
         return (path, p_min)
+    
+    # Proposition alternative pour la fonction min_power, fonctionnant avec une liste de puissances triée
+    def get_liste_power(self):
+        '''
+        Renvoie une liste avec les puissances du graphe triées.
+        Va permettre d'optimiser pour calc
+        '''
+        liste = []
+        # on pourra garder une seule liste_power pour tout le graphe que l'on stockera si on fait plusieurs fois dans le même graphe
+
+        for i in self.graph.values():
+            for k in i:
+                liste.append(k[1])
+
+        liste.sort()
+
+        # Enlever les doublons
+
+        l_power = [liste[0]]
+        for element in liste[1:]:
+            if element != l_power[-1]:
+                l_power.append(element)
+        
+        self.liste_power = l_power
+
+    def alt_min_power(self, src, dest, pourcentile=15):
+        """
+        Should return path, min_power. 
+        """
+        try:
+            type(self.liste_power)
+        except:
+            self.get_liste_power()
+
+        l_power = self.liste_power
+
+        valeur_sup = l_power[-1]
+        valeur_inf = l_power[0]
+        pivot = l_power[int((pourcentile/100)*len(l_power))] # regarder si ça marche mieux avec 70 comme pivot, 60 comme pivot, etc.
+        # la fonction percentile ne marche pas (bcp trop long), donc on va calculer le pct 15 manuellement
+        ind_pivot = l_power.index(pivot)
+
+        # Se déplacer sur l_power et non sur l'ensemble des entiers naturels!
+
+        # liste_power[((len(liste_power)+1)//2)-1])
+
+        while valeur_inf != valeur_sup:
+            # print(len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)]))
+            if self.is_path_with_power(src, dest, pivot) == False: # veut dire que la puissance pivot est trop petite
+                valeur_inf = l_power[ind_pivot + 1] # pivot + 1
+                pivot = l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)][((len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                ind_pivot = l_power.index(pivot)           
+            elif self.is_path_with_power(src, dest, pivot) == True:
+                valeur_sup = pivot
+                pivot = l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)][((len(l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)])+1)//2)-1] # médiane codée manuellement, au lieu de (valeur_inf + valeur_sup) // 2
+                # pivot = (l_power[l_power.index(valeur_inf) : (l_power.index(valeur_sup)+1)],50)
+                ind_pivot = l_power.index(pivot)
+        return self.get_path_with_power(src, dest, pivot), pivot 
 
 #Séance 2
+
     def DFS_parents(self, root=1):
         '''On fait un seul parcours en profondeur pour récupérer tous les liens de parenté à partir du sommet root
         INPUT:
@@ -302,6 +403,7 @@ class Graph:
         '''On récupère l'arbre couvrant de poids minimum'''
         self.kruskal = kruskal(self) 
     
+    # Question 15
     def min_power_routes(self, liste_routes, root=1):
         '''Pour obtenir une liste des min_power pour toutes le routes demandées
         INPUT:
@@ -391,71 +493,83 @@ def graph_from_file(filename):
                 raise Exception("Format incorrect")
     return g
 
+
+# Fonctions intermédiaires pour Kruskal
+def makeset(s, parent, rang):
+    parent[s] = s
+    rang[s] = 0
+
+def sort_by_weight(list_edges):
+    return list_edges.sort(key = lambda x: x[2])
+
+def find(s, parent, rang):
+    while s != parent[s] :
+        s = parent[s]
+    return s
+
+def union(x,y, parent, rang):
+    r_x = find(x, parent, rang)
+    r_y = find(y, parent, rang)
+
+    # Si x et y sont déjà dans le même set
+    if r_x == r_y:
+        return None
+    if rang[r_x] > rang[r_y]:
+        parent[r_y] = r_x
+    else:
+        parent[r_x] = r_y
+        if rang[r_x] == rang[r_y]: 
+            rang[r_y] = rang[r_y] + 1  
+
+def kruskal_int(graphe, parent, rang):
+    '''Algorithme de Kruskal intermédiaire
+    INPUT:
+        - G: un objet de la classe Graph
+    OUTPUT:
+        - X: un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
+    
+    for sommet in graphe.keys():
+    # for sommet in self.nodes:
+        makeset(sommet, parent, rang)
+
+    # X est un graphe vide
+    X = Graph([])
+
+    # Créer une liste avec les noeuds et leur poids
+    liste_aretes = []
+    for sommet, arrivee in graphe.items():
+        for element in arrivee:
+            # On évite de mettre deux fois la même arête
+            if sommet < element[0]:
+                liste_aretes.append([sommet, element[0], element[1], element[2]])
+    
+    # Sort the edges E by weight    
+    sort_by_weight(liste_aretes)
+            
+    for arete in liste_aretes:
+        if find(arete[0], parent, rang) != find(arete[1], parent, rang):
+            X.add_edge(arete[0],arete[1],arete[2],arete[3])
+            union(arete[0], arete[1], parent, rang)
+    
+    return X
+
+# Fonction finale pour Kruskal
 def kruskal(G):
     '''Algorithme de Kruskal
     INPUT:
         - G: un objet de la classe Graph
     OUTPUT:
-        - X: un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
-
-#Définition des fonctions utiles
-    def find(s):
-        while s != parent[s] :
-            s = parent[s]
-        return s
-
-    def kruskal_int(graphe):
-    # Il faut faire kruskal sur chaque composante connexe
-    # Output: A minimum spanning tree defined by the edges X
-        for sommet in graphe.keys():
-        # for sommet in self.nodes:
-            # on réalise makeset sur sommet
-            parent[sommet]=sommet
-            rang[sommet]=0
-        
-        # X est un graphe vide
-        X = Graph([])
-
-        # Créer une liste avec les noeuds et leur poids
-        liste_aretes = []
-        for sommet, arrivee in graphe.items():
-            for element in arrivee:
-                # On évite de mettre deux fois la même arête
-                if sommet < element[0]:
-                    liste_aretes.append([sommet, element[0], element[1], element[2]])
-    
-        # Sort the edges E by weight    
-        liste_aretes.sort(key = lambda x: x[2])
-            
-        for arete in liste_aretes:
-            if find(arete[0]) != find(arete[1]):
-                X.add_edge(arete[0],arete[1],arete[2],arete[3])
-                r_x = find(arete[0])
-                r_y = find(arete[1])
-
-        # Si x et y sont déjà dans le même set
-                if r_x == r_y:
-                    return None
-                if rang[r_x] > rang[r_y]:
-                    parent[r_y] = r_x
-                else:
-                    parent[r_x] = r_y
-                    if rang[r_x] == rang[r_y]: 
-                        rang[r_y] = rang[r_y] + 1    
-
-    
-        return X
+        - un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
 
     # Initialisation
     parent = {}
     rang = {}
 
-    arbre_brut = kruskal_int(G.graph)
+    return kruskal_int(G.graph, parent, rang)
 
-    # On trie les sommets du graphe pour passer les tests unitaires
-    # arbre_brut.graph = {i: arbre_brut.graph[i] for i in range(1,arbre_brut.nb_nodes+1)}
 
-    return arbre_brut
+
+
 
 # Séances 4 et 5
 
@@ -650,6 +764,7 @@ def is_list_trucks_buyable_ratio(list_trucks_for_routes, trucks):
     return False
 
 
+
 def max_utility_from_ratio_glouton(filename_in_trucks, filename_in_routes, filename_out):
     # On prend les trajets dans l'ordre décroissant du ratio utilité/cout
 
@@ -783,7 +898,7 @@ def algorithme_naif(filename_in_trucks, filename_in_routes, filename_out):
                     max_utility = utility
                     best_comb = comb
 
-    return len(best_comb), max_utility
+    return best_comb, max_utility
     # Cet algorithme n'est pas raisonnable: il faut trouver une autre méthode pour calculer toutes les combinaisons
 
 
@@ -791,68 +906,12 @@ def algorithme_naif(filename_in_trucks, filename_in_routes, filename_out):
 
 # On récupère l'arbre de poids minimum, et on supprime les arêtes avec une probabilité epsilon
 
-def makeset(s, parent, rang):
-    parent[s] = s
-    rang[s] = 0
-
-def sort_by_weight(list_edges):
-    return list_edges.sort(key = lambda x: x[2])
-
-def find(s, parent, rang):
-    while s != parent[s] :
-        s = parent[s]
-    return s
-
-def union(x,y, parent, rang):
-    r_x = find(x, parent, rang)
-    r_y = find(y, parent, rang)
-
-    # Si x et y sont déjà dans le même set
-    if r_x == r_y:
-        return None
-    if rang[r_x] > rang[r_y]:
-        parent[r_y] = r_x
-    else:
-        parent[r_x] = r_y
-        if rang[r_x] == rang[r_y]: 
-            rang[r_y] = rang[r_y] + 1  
-
-def kruskal_int(graphe, parent, rang):
-# Input: A connected undirected graph G = (V, E)
-# Il faut faire kruskal sur chaque composante connexe
-# Output: A minimum spanning tree defined by the edges X
-    for sommet in graphe.keys():
-    # for sommet in self.nodes:
-        makeset(sommet, parent, rang)
-
-    # X est un graphe vide
-    X = Graph([])
-
-    # Créer une liste avec les noeuds et leur poids
-    liste_aretes = []
-    for sommet, arrivee in graphe.items():
-        for element in arrivee:
-            # On évite de mettre deux fois la même arête
-            if sommet < element[0]:
-                liste_aretes.append([sommet, element[0], element[1], element[2]])
-    
-    # Sort the edges E by weight    
-    sort_by_weight(liste_aretes)
-            
-    for arete in liste_aretes:
-        if find(arete[0], parent, rang) != find(arete[1], parent, rang):
-            X.add_edge(arete[0],arete[1],arete[2],arete[3])
-            union(arete[0], arete[1], parent, rang)
-    
-    return X
-
-
 def kruskal_epsilon(G, epsilon):
     '''Algorithme de Kruskal
     INPUT:
         - G: un objet de la classe Graph
     OUTPUT:
-        - X: un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
+        - Y: un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
     # Initialisation
     parent = {}
     rang = {}
@@ -885,9 +944,7 @@ def kruskal_epsilon(G, epsilon):
 
 # Il faut d'abord calculer le nombre d'arêtes qu'il faut parcourir pour qu'un trajet soit effectué
 
-def nb_aretes_entre_deux_sommets_kruskal(graphe, src, dest, root=1):
-
-    parent = graphe.DFS_parents(root)
+def nb_aretes_entre_deux_sommets_kruskal(graphe, parent, src, dest, root=1):
 
     chemin = []
 
@@ -928,8 +985,8 @@ def nb_aretes_entre_deux_sommets_kruskal(graphe, src, dest, root=1):
 # La probabilité de pouvoir emprunter le trajet est (1-epsilon)^nb_arêtes
 # Probabilité qu'aucune arête ne se casse sur le trajet
 
-def proba_trajet_kruskal(graphe, src, dest, epsilon, root=1):
-    nb_aretes = nb_aretes_entre_deux_sommets_kruskal(graphe, src, dest, root)
+def proba_trajet_kruskal(graphe, parent, src, dest, epsilon, root=1):
+    nb_aretes = nb_aretes_entre_deux_sommets_kruskal(graphe, parent, src, dest, root)
     return (1-epsilon)**nb_aretes
 
 # L'utilité espérée est le produit de cette probabilité par l'utilité du trajet
@@ -939,10 +996,12 @@ def utilite_esperee(proba, utilite):
 
 # On crée un fichier avec pour chaque trajet l'utilité espérée
 # Il faut ouvrir le fichier routes.x.in pour avoir les trajets et les utilités
-def utilite_esperee_trajets(file_no, epsilon):
+def utilite_esperee_trajets(file_no, epsilon, root=1):
 
     g = graph_from_file("input/network." + file_no + ".in")
     g_kruskal = kruskal(g)
+    parent = g_kruskal.DFS_parents(root)
+
 
     # Calculer les min_power de toutes les routes
     # pour optimiser le process, il faut stocker une liste min power pour tout le graphe
@@ -956,17 +1015,11 @@ def utilite_esperee_trajets(file_no, epsilon):
         for _ in range(n):
             depart, arrivee, utilite = f.readline().split()
             depart, arrivee, utilite = int(depart), int(arrivee), float(utilite)
-            utilite_esp = utilite_esperee(proba_trajet_kruskal(g_kruskal, depart, arrivee, epsilon), utilite)
+            utilite_esp = utilite_esperee(proba_trajet_kruskal(g_kruskal, parent, depart, arrivee, epsilon), utilite)
             liste_trajets.append([depart, arrivee, utilite_esp])
 
-    print(liste_trajets[:10])
-
-    g.get_kruskal()
-    resultats = g.min_power_routes(liste_trajets, 1)
-
-    # print(resultats[:10])
-
-    g = open("output/routes_esp." + file_no + ".out", "w")
-    for min_power in resultats:
-        g.write(str(min_power) + "\n")
+    g = open("input/routes_esp." + file_no + ".in", "w")
+    g.write(str(n) + "\n")
+    for elem in liste_trajets:
+        g.write(str(elem[0]) + ' ' + str(elem[1]) + ' ' + str(elem[2]) + "\n")
     g.close()
