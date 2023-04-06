@@ -1,15 +1,22 @@
 from graph import *
 
 
-print(algorithme_naif("input/trucks.0.in", "input/routes.1.in", "output/routes.1.out"))
 
 
-trucks = trucks_from_file("input/trucks.1.in")
-active_trucks = active_trucks(trucks)
-# print(trucks)
-# print(active_trucks)
+
+trucks = trucks_from_file("input/trucks.2.in")
+print(len(trucks))
+act_trucks = active_trucks(trucks)
+print(len(act_trucks))
+# print(active_trucks[1])
+# print(active_trucks[2])
+# print(active_trucks[3])
+# print(active_trucks[4])
+# print(active_trucks[5])
 # on valide active_trucks pour le fichier trucks.1.in
 
+'''
+print(algorithme_naif("input/trucks.0.in", "input/routes.1.in", "output/routes.1.out"))
 
 print(trucks_for_routes("output/routes.3.out", active_trucks)[:10]) # avec le fichier routes.3.out, on obtient les 5 premiers camions utilisés
 # on valide trucks_for_routes avec le fichier routes.3.out
@@ -28,7 +35,7 @@ print(max_utility_from_ratio_glouton("input/trucks.1.in", "input/routes.3.in", "
 
 # print(routes_and_trucks_with_max_utility("input/trucks.0.in", "input/routes.1.in", "output/routes.1.out"))
 
-
+'''
 
 '''
 # print(max_utility_from_ratio_glouton("input/trucks.0.in", "input/routes.3.in", "output/routes.3.out"))

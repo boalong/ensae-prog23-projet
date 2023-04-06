@@ -462,6 +462,7 @@ def trucks_from_file(filename):
     # On lit le fichier et on crée un dictionnaire de camions, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
     with open(filename, "r") as file:
         n = int(file.readline()) # n est le nombre de modèles de camions
+        # n = 15
         trucks = {i: () for i in range(1,n+1)}
         for i in range(1,n+1):
             char_trucks = tuple(map(int, file.readline().split()))
@@ -469,7 +470,7 @@ def trucks_from_file(filename):
 
     return trucks
 
-
+'''
 def active_trucks(trucks):
     # On crée une liste des camions actifs
     active_trucks = {}
@@ -481,6 +482,27 @@ def active_trucks(trucks):
             ct_cost = trucks[i][1]
     
     return active_trucks
+'''
+
+def active_trucks(trucks):
+    # on commence par le camion le plus puissant
+    # s'il y a un camion plus puissant et moins cher, on le remplace
+
+    min_cost_for_power = 0
+
+    for i in range(1, len(trucks)+1):
+        if trucks[i][1] < min_cost_for_power:
+            min_cost_for_power = trucks[i][1]
+            for j in range(1, i):
+                try:
+                    if trucks[j][1] >= min_cost_for_power:
+                        del trucks[j]
+                except:
+                    pass
+        else:
+            min_cost_for_power = trucks[i][1]
+
+    return trucks
 
 
 def active_trucks_from_file(filename):
