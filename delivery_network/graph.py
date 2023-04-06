@@ -2,6 +2,9 @@ import numpy as np
 from itertools import combinations
 from random import random
 
+
+# Séances 1 et 2
+
 class Graph:
     """
     A class representing graphs as adjacency lists and implementing various algorithms on the graphs. Graphs in the class are not oriented. 
@@ -494,6 +497,13 @@ def graph_from_file(filename):
     return g
 
 
+
+
+
+
+
+# Séance 3
+
 # Fonctions intermédiaires pour Kruskal
 def makeset(s, parent, rang):
     parent[s] = s
@@ -571,13 +581,21 @@ def kruskal(G):
 
 
 
+
 # Séances 4 et 5
 
 def trucks_from_file(filename):
+    '''
+    Cette fonction lit un fichier texte et renvoie un dictionnaire de camions, 
+    avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
+    INPUT:
+        - filename: le nom du fichier contenant les caractéristiques des camions (trucks.x.in)
+    OUTPUT:
+        - trucks: un dictionnaire de camions, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
+    '''
     # On lit le fichier et on crée un dictionnaire de camions, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
     with open(filename, "r") as file:
         n = int(file.readline()) # n est le nombre de modèles de camions
-        # n = 15
         trucks = {i: () for i in range(1,n+1)}
         for i in range(1,n+1):
             char_trucks = tuple(map(int, file.readline().split()))
@@ -585,22 +603,16 @@ def trucks_from_file(filename):
 
     return trucks
 
-'''
 def active_trucks(trucks):
-    # On crée une liste des camions actifs
-    active_trucks = {}
-    # les camions sont par ordre croissant de puissance
-    ct_cost = 0
-    for i in trucks.keys():
-        if trucks[i][1] > ct_cost:
-            active_trucks[i] = trucks[i]
-            ct_cost = trucks[i][1]
-    
-    return active_trucks
-'''
-
-def active_trucks(trucks):
-    # on commence par le camion le plus puissant
+    '''
+    Cette fonction renvoie un dictionnaire ne contenant que les camions intéressants, c'est-à-dire
+    les camions les moins chers pour une puissance donnée
+    INPUT:
+        - trucks: un dictionnaire de camions, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
+    OUTPUT:
+        - trucks: un dictionnaire de camions actifs, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
+    '''
+    # le dictionnaire de camions est déjà trié par puissance croissante
     # s'il y a un camion plus puissant et moins cher, on le remplace
 
     min_cost_for_power = 0
@@ -619,17 +631,25 @@ def active_trucks(trucks):
 
     return trucks
 
-
 def active_trucks_from_file(filename):
+    '''
+    Cette fonction lit un fichier texte et renvoie un dictionnaire de camions actifs, définis comme les camions les moins chers pour une puissance donnée
+    INPUT:
+        - filename: le nom du fichier contenant les caractéristiques des camions (trucks.x.in)
+    OUTPUT:
+        - un dictionnaire de camions actifs, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)'''
     # On lit le fichier et on crée un dictionnaire de camions actifs, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
     trucks = trucks_from_file(filename)
-    ac_trucks = active_trucks(trucks)
-    
-    return ac_trucks
-
+    return active_trucks(trucks)
 
 def list_routes_from_file(filename):
-    # On lit le fichier et on crée une liste de trajets, avec comme élément une liste de caractéristiques (départ, arrivée, utilité)
+    '''
+    Cette fonction lit un fichier texte et renvoie une liste de trajets, avec comme élément une liste de caractéristiques (départ, arrivée, utilité)
+    INPUT:
+        - filename: le nom du fichier contenant les caractéristiques des trajets (routes.x.in)
+    OUTPUT:
+        - liste_trajets: une liste de trajets, avec comme élément une liste de caractéristiques (départ, arrivée, utilité)
+    '''
     with open(filename, 'r') as f:
         n = int(f.readline())
         liste_trajets = []
@@ -641,14 +661,15 @@ def list_routes_from_file(filename):
     
     return liste_trajets
 
-# On va calculer min_power_routes pour chaque camion
-
-# On prend par défaut le camion le moins coûteux et on regarde s'il passe.
-# S'il ne passe pas, on prend le camion suivant
-
-# Il faut utiliser les fichiers routes.x.out
-
 def trucks_for_routes(filename, trucks):
+    '''
+    Cette fonction lit un fichier texte de la forme routes.x.out et renvoie une liste de camions parallèle à la liste de trajets, 
+    avec pour chaque trajet le camion le moins coûteux qui passe
+    INPUT:
+        - filename: le nom du fichier contenant les caractéristiques des trajets (routes.x.out)
+        - trucks: un dictionnaire de camions actifs, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
+    OUTPUT:
+        - list_trucks_for_routes: une liste de camions parallèle à la liste de trajets, avec pour chaque trajet le camion le moins coûteux qui passe'''
     # On crée une liste de camions parallèle à la liste de trajets, avec pour chaque trajet le camion le moins coûteux qui passe
     # il faudra d'abord supprimer les camions pour lesquels il en existe un avec une puissance supérieure et un coût inférieur
     # les fichiers routes.x.out affichent pour chaque ligne la puissance minimale requise pour le trajet
@@ -657,7 +678,7 @@ def trucks_for_routes(filename, trucks):
     list_trucks_for_routes = []
     for line in f:
         if line == "0\n":
-            list_trucks_for_routes.append(1)
+            list_trucks_for_routes.append(1) # si la puissance requise pour le trajet est nulle, on prend le camion le moins coûteux
             continue
         power_min = int(line[:-3])
         # print(power_min)
@@ -666,13 +687,19 @@ def trucks_for_routes(filename, trucks):
                 # print(truck)
                 list_trucks_for_routes.append(truck)
                 break
-            elif truck == len(trucks): # s'il s'agit du camion le plus puissant
+            elif truck == len(trucks): # s'il s'agit du camion le plus puissant, et que malgré tout la puissance requise n'est pas atteinte, on entre 0
                 list_trucks_for_routes.append(0)
 
     return list_trucks_for_routes
 
-
 def is_list_trucks_buyable(list_trucks_for_routes, trucks):
+    '''
+    Cette fonction vérifie si le budget est suffisant pour acheter les camions nécessaires à tous les trajets de la liste entrée
+    INPUT:
+        - list_trucks_for_routes: une liste de camions parallèle à la liste de trajets, avec pour chaque trajet le camion le moins coûteux qui passe
+        - trucks: un dictionnaire de camions actifs, avec comme clé le numéro du camion et comme valeur un tuple de caractéristiques (puissance, coût)
+    OUTPUT:
+        - True si le budget est suffisant, False sinon'''
     # On vérifie que le budget est suffisant pour faire toutes les routes de la liste entrée
     B = 25*10**9
     cost = 0
@@ -685,23 +712,33 @@ def is_list_trucks_buyable(list_trucks_for_routes, trucks):
         return True
     return False
 
-
-def routes_and_trucks_with_max_utility(filename_in_trucks, filename_in_routes, filename_out):
-    # filename est le nom du fichier routes.x.in
+def naive_add_routes_until_budget_exceeded(filename_in_trucks, filename_in_routes, filename_out):
+    '''
+    Cette fonction prend les routes dans l'ordre jusqu'à ce que le budget soit dépassé.
+    Cela donne un 1er résultat que l'on pourra comparer avec les résultats de l'algorithme knapsack.
+    INPUT:
+        - filename_in_trucks: le nom du fichier contenant les caractéristiques des camions (trucks.x.in)
+        - filename_in_routes: le nom du fichier contenant les caractéristiques des trajets (routes.x.in)
+        - filename_out: le nom du fichier contenant les caractéristiques des trajets (routes.x.out)
+    OUTPUT:
+        - list_routes_done: une liste des trajets effectués, avec comme élément une liste de caractéristiques (départ, arrivée, utilité)
+        - utility: l'utilité totale'''
+    
     # On suppose que l'on a déjà trucks
     # On prend les routes dans l'ordre jusqu'à ce que le budget soit dépassé
-    # Cela donne un 1er résultat que l'on pourra comparer avec les résultats de l'algorithme knapsack
 
     trucks = active_trucks_from_file(filename_in_trucks)
 
     list_trucks_for_routes = trucks_for_routes(filename_out, trucks)
 
     i=1
-    list_routes_max = list_trucks_for_routes[:i]
-    while is_list_trucks_buyable(list_routes_max, trucks):
+    list_trucks_max = list_trucks_for_routes[:i]
+    while is_list_trucks_buyable(list_trucks_max, trucks):
         # print(is_list_trucks_buyable(list_routes_max, trucks))
         i+=1
-        list_routes_max = list_trucks_for_routes[:i]
+        list_trucks_max = list_trucks_for_routes[:i]
+
+    list_trucks_max.pop()
 
     # Afficher les routes, afficher l'utilité totale
     list_routes = list_routes_from_file(filename_in_routes)
@@ -709,24 +746,32 @@ def routes_and_trucks_with_max_utility(filename_in_trucks, filename_in_routes, f
 
     utility = 0
 
-    for i in range(len(list_routes_max)): # i est l'indice du camion le plus économique pour chaque trajet
-        if list_routes_max[i] != 0:
+    for i in range(len(list_trucks_max)): # i est l'indice du camion le plus économique pour chaque trajet
+        if list_trucks_max[i] != 0:
             list_routes_done.append((list_routes[i][0], list_routes[i][1]))
             utility += list_routes[i][2]
 
     active_index = 0
-    for i in range(len(list_routes_max)):
-        if list_routes_max[active_index] == 0:
-            list_routes_max.pop(active_index)
+    for i in range(len(list_trucks_max)):
+        if list_trucks_max[active_index] == 0:
+            list_trucks_max.pop(active_index)
         else:
             active_index += 1
 
-    return len(list_routes_max), len(list_routes_done), utility # le nombre de trajets effectués, l'utilité
+    # return list_routes_done, utility # le nombre de trajets effectués, l'utilité
+    return len(list_routes_done), utility # le nombre de trajets effectués, l'utilité car on ne veut pas afficher les trajets effectués sinon il y a pb d'affichage
      
-
-
+# Fonctions pour l'algorithme knapsack
 def ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out):
-    # On calcule un ration utiié/cout pour chaque trajet
+    '''
+    Cette fonction calcule le ratio utilité/cout pour chaque trajet
+    INPUT:
+        - filename_in_trucks: le nom du fichier contenant les caractéristiques des camions (trucks.x.in)
+        - filename_in_routes: le nom du fichier contenant les caractéristiques des trajets (routes.x.in)
+        - filename_out: le nom du fichier contenant les caractéristiques des trajets (routes.x.out)
+    OUTPUT:
+        - liste_ratio: une liste de tuples (ratio, indice du trajet)
+        - liste_camions: une liste de camions parallèle à la liste des ratios, avec pour chaque trajet le camion le moins coûteux qui passe'''
 
     liste_ratio = []
 
@@ -744,44 +789,39 @@ def ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out):
     liste_ratio.sort(reverse=True)
     
     for i in range(len(liste_ratio)):
-        # avec l'indice du trajet on va récupérer le numéro du camion avec list_trucks_for_routes[ind_trajet]
+        # avec l'indice du trajet on va récupérer le numéro du camion avec list_trucks_for_routes
         liste_camions.append(list_trucks_for_routes[liste_ratio[i][1]]) # on a une liste de camions
 
     return liste_ratio, liste_camions
 
-
-def is_list_trucks_buyable_ratio(list_trucks_for_routes, trucks):
-    # On vérifie que le budget est suffisant pour faire toutes les routes de la liste entrée
-    B = 25*10**9
-    cost = 0
-    for truck in list_trucks_for_routes:
-        if truck != 0: # le trajet peut être effectué
-            # print(truck)
-            # print(trucks[truck])
-            cost += trucks[truck][1]
-    if B - cost >= 0:
-        return True
-    return False
-
-
-
+# Algorithme glouton/knapsack
 def max_utility_from_ratio_glouton(filename_in_trucks, filename_in_routes, filename_out):
-    # On prend les trajets dans l'ordre décroissant du ratio utilité/cout
+    '''
+    Cette fonction prend les trajets dans l'ordre décroissant du ratio utilité/cout jusqu'à ce que le budget soit dépassé.
+    Elle donne une approximation de la solution optimale, mais la solution optimale n'est pas atteinte forcément, car le budget peut ne
+    pas être atteint.
+    INPUT:
+        - filename_in_trucks: le nom du fichier contenant les caractéristiques des camions (trucks.x.in)
+        - filename_in_routes: le nom du fichier contenant les caractéristiques des trajets (routes.x.in)
+        - filename_out: le nom du fichier contenant les caractéristiques des trajets (routes.x.out)
+    OUTPUT:
+        - list_routes_done: une liste des trajets effectués, avec comme élément une liste de caractéristiques (départ, arrivée, utilité)
+        - utility: l'utilité totale'''
 
     trucks = active_trucks_from_file(filename_in_trucks)
-    
+
     liste_ratio, liste_camions = ratio_utility_cost(filename_in_trucks, filename_in_routes, filename_out)
 
     i=1
-    list_routes_max = liste_camions[:i]
-    while is_list_trucks_buyable_ratio(list_routes_max, trucks):
-        # print(is_list_trucks_buyable(list_routes_max, trucks))
+    list_trucks_max = liste_camions[:i]
+    while is_list_trucks_buyable(list_trucks_max, trucks):
+        # print(is_list_trucks_buyable(list_trucks_max, trucks))
         i+=1
         if i%1000 == 0:
             print(i)
-        list_routes_max = liste_camions[:i] # on prend les i trajets les plus rentables
+        list_trucks_max = liste_camions[:i] # on prend les i trajets les plus rentables
 
-    list_routes_max.pop()
+    list_trucks_max.pop()
 
     # Afficher les routes, afficher l'utilité totale
     list_routes = list_routes_from_file(filename_in_routes)
@@ -789,22 +829,21 @@ def max_utility_from_ratio_glouton(filename_in_trucks, filename_in_routes, filen
 
     utility = 0
 
-    for i in range(len(list_routes_max)): # i est l'indice du camion le plus économique pour chaque trajet
-        if list_routes_max[i] != 0:
+    for i in range(len(list_trucks_max)): # i est l'indice du camion le plus économique pour chaque trajet
+        if list_trucks_max[i] != 0:
             ind_route = liste_ratio[i][1]
             list_routes_done.append((list_routes[ind_route][0], list_routes[ind_route][1]))
             utility += list_routes[ind_route][2]
 
     active_index = 0
-    for i in range(len(list_routes_max)):
-        if list_routes_max[active_index] == 0:
-            list_routes_max.pop(active_index)
+    for i in range(len(list_trucks_max)):
+        if list_trucks_max[active_index] == 0:
+            list_trucks_max.pop(active_index)
         else:
             active_index += 1
 
-    return len(list_routes_max), len(list_routes_done), utility
-
-
+    # return list_routes_done, utility
+    return len(list_routes_done), utility # on retourne le nombre de trajets effectués et l'utilité totale car sinon on aurait un problème d'affichage
 
 def improved_glouton(filename_in_trucks, filename_in_routes, filename_out):
     # On prend les trajets dans l'ordre décroissant du ratio utilité/cout
@@ -818,7 +857,7 @@ def improved_glouton(filename_in_trucks, filename_in_routes, filename_out):
     i=1
     list_routes_max = liste_camions[:i]
     # list_routes_max est la liste des numéros de camions qui effectuent les trajets les plus rentables
-    while is_list_trucks_buyable_ratio(list_routes_max, trucks):
+    while is_list_trucks_buyable(list_routes_max, trucks):
         # print(is_list_trucks_buyable(list_routes_max, trucks))
         i+=1
         if i%1000 == 0:
@@ -864,9 +903,17 @@ def improved_glouton(filename_in_trucks, filename_in_routes, filename_out):
 
     return len(list_routes_max), len(list_routes_done), utility
 
-
-
 def algorithme_naif(filename_in_trucks, filename_in_routes, filename_out):
+    '''
+    Cette algorithme donne une solution optimale, mais le temps de calcul est très long, car il faut tester toutes les combinaisons de trajets possibles.
+    INPUT:
+        - filename_in_trucks: le nom du fichier contenant les camions
+        - filename_in_routes: le nom du fichier contenant les trajets
+        - filename_out: le nom du fichier de sortie
+    OUTPUT:
+        - best_comb: la liste des trajets à effectuer
+        - max_utility: l'utilité totale de la combinaison
+    ''' 
 
     trucks = active_trucks_from_file(filename_in_trucks)
     routes = list_routes_from_file(filename_in_routes)
@@ -902,16 +949,20 @@ def algorithme_naif(filename_in_trucks, filename_in_routes, filename_out):
     # Cet algorithme n'est pas raisonnable: il faut trouver une autre méthode pour calculer toutes les combinaisons
 
 
-# Question 20
+
+# Question 20 (i)
 
 # On récupère l'arbre de poids minimum, et on supprime les arêtes avec une probabilité epsilon
-
+# Finalement, cette fonction n'est pas utilisée
 def kruskal_epsilon(G, epsilon):
-    '''Algorithme de Kruskal
+    '''
+    Algorithme de Kruskal avec suppression des arêtes avec une probabilité epsilon
     INPUT:
         - G: un objet de la classe Graph
+        - epsilon: un réel entre 0 et 1
     OUTPUT:
-        - Y: un objet de la classe Graph : l'arbre couvrant de poids minimum de G'''
+        - Y: un objet de la classe Graph : l'arbre couvrant de poids minimum de G avec suppression des arêtes avec une probabilité epsilon'''
+    
     # Initialisation
     parent = {}
     rang = {}
@@ -935,16 +986,22 @@ def kruskal_epsilon(G, epsilon):
     
     return Y
 
-
-# Maintenant qu'on a l'arbre couvrant de poids minimum, on peut calculer toutes les fonction précédentes
-
-
 # Pour calculer l'espérance d'utilité d'un trajet, il faut calculer la probabilité qu'il ne puisse plus être accessible
 # C'est-à-dire qu'une arête se soit cassée dessus
-
 # Il faut d'abord calculer le nombre d'arêtes qu'il faut parcourir pour qu'un trajet soit effectué
 
 def nb_aretes_entre_deux_sommets_kruskal(graphe, parent, src, dest, root=1):
+    '''
+    Fonction qui calcule le nombre d'arêtes entre deux sommets dans un arbre couvrant de poids minimum
+    INPUT:
+        - graphe: un arbre couvrant de poids minimum, objet de la classe Graph
+        - parent: un dictionnaire contenant les parents des sommets
+        - src: le sommet de départ
+        - dest: le sommet d'arrivée
+        - root: le sommet de départ du DFS
+    OUTPUT:
+        - nb_aretes: le nombre d'arêtes entre les deux sommets
+    '''
 
     chemin = []
 
@@ -981,27 +1038,53 @@ def nb_aretes_entre_deux_sommets_kruskal(graphe, parent, src, dest, root=1):
     # print(chemin)
     return len(chemin)-1
 
-
 # La probabilité de pouvoir emprunter le trajet est (1-epsilon)^nb_arêtes
 # Probabilité qu'aucune arête ne se casse sur le trajet
 
 def proba_trajet_kruskal(graphe, parent, src, dest, epsilon, root=1):
+    '''
+    Fonction qui calcule la probabilité qu'aucune arête ne se casse sur le trajet
+    INPUT:
+        - graphe: un arbre couvrant de poids minimal, objet de la classe Graph
+        - parent: un dictionnaire contenant les parents des sommets
+        - src: le sommet de départ
+        - dest: le sommet d'arrivée
+        - epsilon: un réel entre 0 et 1
+        - root: le sommet de départ du DFS
+    OUTPUT:
+        - la probabilité qu'aucune arête ne se casse sur le trajet'''
+    
     nb_aretes = nb_aretes_entre_deux_sommets_kruskal(graphe, parent, src, dest, root)
     return (1-epsilon)**nb_aretes
 
 # L'utilité espérée est le produit de cette probabilité par l'utilité du trajet
 
 def utilite_esperee(proba, utilite):
+    '''
+    Fonction qui calcule l'utilité espérée d'un trajet
+    INPUT:
+        - proba: la probabilité qu'aucune arête ne se casse sur le trajet
+        - utilite: l'utilité du trajet
+    OUTPUT:
+        - l'utilité espérée du trajet'''
+    
     return proba*utilite
 
 # On crée un fichier avec pour chaque trajet l'utilité espérée
 # Il faut ouvrir le fichier routes.x.in pour avoir les trajets et les utilités
 def utilite_esperee_trajets(file_no, epsilon, root=1):
+    '''
+    Fonction qui calcule l'utilité espérée de tous les trajets
+    INPUT:
+        - file_no: str, le numéro du fichier 
+        - epsilon: un réel entre 0 et 1
+        - root: le sommet de départ du DFS
+    OUTPUT:
+        - un fichier avec pour chaque trajet l'utilité espérée'''
 
     g = graph_from_file("input/network." + file_no + ".in")
     g_kruskal = kruskal(g)
     parent = g_kruskal.DFS_parents(root)
-
 
     # Calculer les min_power de toutes les routes
     # pour optimiser le process, il faut stocker une liste min power pour tout le graphe
@@ -1023,3 +1106,6 @@ def utilite_esperee_trajets(file_no, epsilon, root=1):
     for elem in liste_trajets:
         g.write(str(elem[0]) + ' ' + str(elem[1]) + ' ' + str(elem[2]) + "\n")
     g.close()
+
+# Maintenant, il suffit d'appliquer l'algo glouton pour trouver une estimation de la solution optimale
+

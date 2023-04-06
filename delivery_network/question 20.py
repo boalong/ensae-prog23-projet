@@ -1,8 +1,8 @@
 from graph import *
 
 G = graph_from_file("input/network.00.in")
-# print(kruskal(G))
-G_kruskal = kruskal_epsilon(G, 0) # aucune arête ne se casse
+print(kruskal(G))
+G_kruskal = kruskal_epsilon(G, 0.5) # aucune arête ne se casse
 print(G_kruskal)
 # print(kruskal_epsilon(G, 1))
 # print(kruskal_epsilon(G, 0.5))
@@ -19,3 +19,4 @@ print("done")
 utilite_esperee_trajets("3", 0.001)
 print("done")
 utilite_esperee_trajets("4", 0.001)
+print("done")
