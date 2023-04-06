@@ -1108,4 +1108,3 @@ def utilite_esperee_trajets(file_no, epsilon, root=1):
     g.close()
 
 # Maintenant, il suffit d'appliquer l'algo glouton pour trouver une estimation de la solution optimale
-
