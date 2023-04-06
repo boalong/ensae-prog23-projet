@@ -471,16 +471,24 @@ def trucks_from_file(filename):
 
 
 def active_trucks(trucks):
-    # On crée une liste des camions actifs
-    active_trucks = {}
-    # les camions sont par ordre croissant de puissance
-    ct_cost = 0
-    for i in trucks.keys():
-        if trucks[i][1] > ct_cost:
-            active_trucks[i] = trucks[i]
-            ct_cost = trucks[i][1]
-    
-    return active_trucks
+    # on commence par le camion le plus puissant
+    # s'il y a un camion plus puissant et moins cher, on le remplace
+
+    min_cost_for_power = 0
+
+    for i in range(1, len(trucks)+1):
+        if trucks[i][1] < min_cost_for_power:
+            min_cost_for_power = trucks[i][1]
+            for j in range(1, i):
+                try:
+                    if trucks[j][1] >= min_cost_for_power:
+                        del trucks[j]
+                except:
+                    pass
+        else:
+            min_cost_for_power = trucks[i][1]
+
+    return trucks
 
 
 def active_trucks_from_file(filename):

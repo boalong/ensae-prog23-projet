@@ -4,8 +4,8 @@ from graph import Graph, graph_from_file
 
 ## Question 10. 
 
-data_path = "input/"
-file_no = "10.in"
+data_path = "/home/onyxia/ensae-prog23-private/input/"
+file_no = "7.in"
 
 g = graph_from_file(data_path + "network." + file_no)
 
@@ -21,7 +21,7 @@ start = perf_counter()
 for trajet in liste_trajets[:10]:
     g.min_power(trajet[0], trajet[1])
 stop = perf_counter()
-print("Estimation :" , (stop-start)*50000/60) # on divise par 60 pour avoir les minutes
+print("Estimation :" , ((stop-start)*50000)/60) # on divise par 60 pour avoir les minutes
 
 # il faut multiplier le temps par 500 (car on ne fait que les 1000 premiers trajets ici)
 
@@ -32,12 +32,6 @@ Estimation : 50048.314666666665
 Commentaire : plus de 50000 minutes, soit 833 heures, soit 34 jours, ce qui est beaucoup trop long pour un ordinateur.
 '''
 
-
-## Question 15.
-
-# Pour la question 15, on a créé une fonction spéciale min_power_routes qui prend en entrée une liste de trajets et qui renvoie une des puissances minimales.
-
-# Les résultats de la question 15 sont dans le fichier question 15.py.
 
 
 
